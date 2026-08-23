@@ -1,0 +1,8 @@
+
+[DATABASE:ERR1][USER_REPOSITORY:ERR2][AUTH_SERVICE:ERR3][LOGIN_CONTROLLER:ERR4]
+[ERROR-1][2026-08-23 23:03:00][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
+[ERROR-2][2026-08-23 23:03:00][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
+[ERROR-3][2026-08-23 23:03:00][WARNING][AUTH_SERVICE:ERR3] Authentication failed — could not verify user identity
+[ERROR-4][2026-08-23 23:03:00][WARNING][LOGIN_CONTROLLER:ERR4] Login request failed for user — returning 500 to client
+
+---
