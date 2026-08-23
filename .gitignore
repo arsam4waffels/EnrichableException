@@ -1,0 +1,33 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Build output
+target/
+bin/
+
+# Logs
+*.log
+
+# Eclipse
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated/
+.springBeans
+.sts4-cache/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
