@@ -9,6 +9,7 @@ bin/
 
 # Logs
 *.log
+!errors.log
 
 # Eclipse
 .classpath

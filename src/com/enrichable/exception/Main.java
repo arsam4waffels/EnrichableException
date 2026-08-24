@@ -24,6 +24,9 @@ public class Main {
                     "Failed to fetch user with ID: 1042",
                     ErrorLevel.ERROR
             );
+            e.addMetaData("userId", "1042")
+                    .addMetaData("operation", "login")
+                    .addMetaData("database", "users");
             throw e;
         }
     }
@@ -63,13 +66,13 @@ public class Main {
                         .setShowErrorLevel(true)
                         .setShowErrorCount(true)
                         .setLogToFile(true)
+                        .setShowMetadata(true)
         );
 
         try {
             loginController();
         } catch (EnrichableException e) {
             System.out.println(e);
-            System.out.println("Log saved to errors.log");
         }
     }
 }

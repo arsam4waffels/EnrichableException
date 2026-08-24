@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 /*
  * Regular exceptions: "I failed."
  * EnrichableException: "Allow me to explain exactly how."
@@ -56,7 +59,7 @@ public class EnrichableException extends RuntimeException {
                                               String exceptionCode,
                                               String exceptionMessage,
                                               ErrorLevel exceptionErrorLevel) {
-        ++exceptionCounter; // One more victim added to the list.
+        this.exceptionCounter++; // One more victim added to the list.
         informationList.add(new ExceptionInformation(
                 exceptionContext,
                 exceptionCode,
@@ -97,6 +100,16 @@ public class EnrichableException extends RuntimeException {
                     .append(exceptionInformation.exceptionMessage)
                     .append("\n");
         }
+        // The errors told their story. Now for the supporting evidence.
+        if (config.getShowMetadata())
+            for (Map.Entry<String, String> metadataInfo : metadataMap.entrySet()) {
+                stringBuilder.append("[")
+                        .append(metadataInfo.getKey())
+                        .append("=")
+                        .append(metadataInfo.getValue())
+                        .append("]")
+                        .append("\n");
+            }
         String result = stringBuilder.toString();
         if (config.getLogToFile()) logToFile(result);
         return stringBuilder.toString();
@@ -111,5 +124,11 @@ public class EnrichableException extends RuntimeException {
             // Peak comedy.
             System.out.println("[The error logger failed while logging an error.] " + e.getMessage());
         }
+    }
+    private final Map<String, String> metadataMap = new HashMap<>();
+    // Give the error some receipts.
+    public EnrichableException addMetaData(String key, String value) {
+        metadataMap.put(key, value);
+        return this;
     }
 }

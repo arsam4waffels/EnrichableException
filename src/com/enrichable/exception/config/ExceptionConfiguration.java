@@ -9,6 +9,8 @@ public class ExceptionConfiguration {
     private boolean showErrorCount = false;
     // Yeah... I just feel console isn't enough.
     private boolean logToFile = false;
+    // In case you need a little bit more data
+    private boolean showMetadata = false;
 
     public ExceptionConfiguration setShowTimestamp(boolean showTimestamp) {
         this.showTimestamp = showTimestamp;
@@ -37,5 +39,12 @@ public class ExceptionConfiguration {
     }
     public boolean getLogToFile() {
         return this.logToFile;
+    }
+    public ExceptionConfiguration setShowMetadata(boolean showMetadata) {
+        this.showMetadata = showMetadata;
+        return this;
+    }
+    public boolean getShowMetadata() {
+        return this.showMetadata;
     }
 }
