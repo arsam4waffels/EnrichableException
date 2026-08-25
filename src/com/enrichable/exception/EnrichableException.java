@@ -28,6 +28,7 @@ public class EnrichableException extends RuntimeException {
         String exceptionMessage;        // What actually went wrong
         String exceptionDateTime;       // When the chaos happened?
         ErrorLevel exceptionErrorLevel; // How doomed are we?
+        Throwable exceptionCause;       // For what cause
         ExceptionInformation(String exceptionContext,
                              String exceptionCode,
                              String exceptionMessage,
@@ -47,7 +48,9 @@ public class EnrichableException extends RuntimeException {
     public EnrichableException(String exceptionContext,
                                String exceptionCode,
                                String exceptionMessage,
-                               ErrorLevel exceptionErrorLevel) {
+                               ErrorLevel exceptionErrorLevel,
+                               Throwable exceptionCause) {
+        super(exceptionMessage, exceptionCause);
         addInformation(
                 exceptionContext,
                 exceptionCode,
