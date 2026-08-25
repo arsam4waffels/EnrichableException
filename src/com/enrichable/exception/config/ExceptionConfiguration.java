@@ -7,8 +7,6 @@ public class ExceptionConfiguration {
     private boolean showErrorLevel = false;
     // In case there are more than one problem.
     private boolean showErrorCount = false;
-    // Yeah... I just feel console isn't enough.
-    private boolean logToFile = false;
     // In case you need a little bit more data
     private boolean showMetadata = false;
 
@@ -32,13 +30,6 @@ public class ExceptionConfiguration {
     }
     public boolean getShowErrorCount() {
         return this.showErrorCount;
-    }
-    public ExceptionConfiguration setLogToFile(boolean logToFile) {
-        this.logToFile = logToFile;
-        return this;
-    }
-    public boolean getLogToFile() {
-        return this.logToFile;
     }
     public ExceptionConfiguration setShowMetadata(boolean showMetadata) {
         this.showMetadata = showMetadata;

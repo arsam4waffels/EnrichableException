@@ -71,6 +71,10 @@ public class EnrichableException extends RuntimeException {
     @Override
     public String toString() { // This is the place were we unpack the trauma XD.
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("[")
+                .append(exceptionCounter)
+                .append("-ERRORS")
+                .append("]");
         for (ExceptionInformation exceptionInformation : informationList) {
             stringBuilder.append("[")
                     .append(exceptionInformation.exceptionContext)
@@ -110,9 +114,11 @@ public class EnrichableException extends RuntimeException {
                         .append("]")
                         .append("\n");
             }
-        String result = stringBuilder.toString();
-        if (config.getLogToFile()) logToFile(result);
         return stringBuilder.toString();
+    }
+    public void log() {
+        String result = this.toString();
+        logToFile(result);
     }
     // Because apparently printing it isn't enough.
     private void logToFile(String content) {

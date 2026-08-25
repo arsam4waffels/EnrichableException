@@ -23,7 +23,7 @@ public class Main {
                     "ERR2",
                     "Failed to fetch user with ID: 1042",
                     ErrorLevel.ERROR
-            );
+            ).log(); // chain it!
             e.addMetaData("userId", "1042")
                     .addMetaData("operation", "login")
                     .addMetaData("database", "users");
@@ -55,6 +55,7 @@ public class Main {
                     "Login request failed for user — returning 500 to client",
                     ErrorLevel.WARNING
             );
+            // e.log(); <- if you are against chaining
             throw e;
         }
     }
@@ -65,10 +66,8 @@ public class Main {
                         .setShowTimestamp(true)
                         .setShowErrorLevel(true)
                         .setShowErrorCount(true)
-                        .setLogToFile(true)
                         .setShowMetadata(true)
         );
-
         try {
             loginController();
         } catch (EnrichableException e) {
