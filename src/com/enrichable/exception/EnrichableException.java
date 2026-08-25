@@ -2,6 +2,8 @@ package com.enrichable.exception;
 
 import com.enrichable.exception.config.ErrorLevel;
 import com.enrichable.exception.config.ExceptionConfiguration;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,7 +30,6 @@ public class EnrichableException extends RuntimeException {
         String exceptionMessage;        // What actually went wrong
         String exceptionDateTime;       // When the chaos happened?
         ErrorLevel exceptionErrorLevel; // How doomed are we?
-        Throwable exceptionCause;       // For what cause
         ExceptionInformation(String exceptionContext,
                              String exceptionCode,
                              String exceptionMessage,
@@ -50,6 +51,7 @@ public class EnrichableException extends RuntimeException {
                                String exceptionMessage,
                                ErrorLevel exceptionErrorLevel,
                                Throwable exceptionCause) {
+        // I'm just letting Java remember who started this whole mess.
         super(exceptionMessage, exceptionCause);
         addInformation(
                 exceptionContext,
@@ -62,6 +64,12 @@ public class EnrichableException extends RuntimeException {
                                               String exceptionCode,
                                               String exceptionMessage,
                                               ErrorLevel exceptionErrorLevel) {
+        // Before we add another victim, make sure it's a valid one. Otherwise, explode.
+        validateRequiredText(exceptionContext, "Exception context");
+        validateRequiredText(exceptionCode, "Exception code");
+        validateRequiredText(exceptionMessage, "Exception message");
+        validateErrorLevel(exceptionErrorLevel);
+
         this.exceptionCounter++; // One more victim added to the list.
         informationList.add(new ExceptionInformation(
                 exceptionContext,
@@ -69,7 +77,20 @@ public class EnrichableException extends RuntimeException {
                 exceptionMessage,
                 exceptionErrorLevel
         ));
-        return this; // Yes, we are chaining this thing.
+        return this; // One error at a time, one chain at a time.
+    }
+    private void validateRequiredText(String value, String fieldName) {
+        // Null is not a personality trait. Fix it before proceeding.
+        if (value == null)
+            throw new IllegalArgumentException(fieldName + " cannot be null.");
+        // An empty error description is not exactly helpful. why are you even doing this?
+        if (value.isBlank())
+            throw new IllegalArgumentException(fieldName + " cannot be blank.");
+    }
+    private void validateErrorLevel(ErrorLevel errorLevel) {
+        // An error without a severity level? Bold strategy mate.
+        if (errorLevel == null)
+            throw new IllegalArgumentException("Error level cannot be null.");
     }
     @Override
     public String toString() { // This is the place were we unpack the trauma XD.
@@ -137,7 +158,24 @@ public class EnrichableException extends RuntimeException {
     private final Map<String, String> metadataMap = new HashMap<>();
     // Give the error some receipts.
     public EnrichableException addMetaData(String key, String value) {
-        metadataMap.put(key, value);
+        metadataMap.put(
+                normalizeMetadataKey(key),
+                normalizeMetadataValue(value)
+        );
         return this;
+    }
+    @Contract("null -> fail")
+    private @NotNull String normalizeMetadataKey(String key) {
+        // Metadata without a key? We're not doing anonymous paperwork.
+        if (key == null) throw new IllegalArgumentException("Metadata key cannot be null.");
+        // Empty is allowed. Unnamed emptiness is not.
+        if (key.isBlank()) return "BLANK";
+        return key;
+    }
+    @Contract("null -> fail")
+    private @NotNull String normalizeMetadataValue(String value) {
+        if (value == null) throw new IllegalArgumentException("Metadata value cannot be null.");
+        if (value.isBlank()) return "BLANK";
+        return value;
     }
 }

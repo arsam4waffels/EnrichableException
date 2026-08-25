@@ -33,7 +33,7 @@ public class Main {
                 "REPO-002",
                 "Failed to fetch user with ID: 1042.",
                 ErrorLevel.ERROR
-        );
+        ).addMetaData("", "null");
 
         // And another one, because apparently one error wasn't enough.
         exception.addInformation(
@@ -53,7 +53,7 @@ public class Main {
         System.out.println(exception);
 
         // Save the same information to errors.log.
-        exception.log();
+        // exception.log();
 
         // The actual cause is still available through Java's exception chain.
         System.out.println("Original cause:");
