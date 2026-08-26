@@ -90,12 +90,6 @@ public class EnrichableException extends RuntimeException {
         if (errorLevel == null)
             throw new IllegalArgumentException("Error level cannot be null.");
     }
-    private void validateExceptionContext(String exceptionContext) {
-        if (exceptionContext == null)
-            throw new IllegalArgumentException(
-                    "Exception context cannot be null."
-            );
-    }
     @Override
     public String toString() { // This is the place were we unpack the trauma XD.
         StringBuilder stringBuilder = new StringBuilder();
