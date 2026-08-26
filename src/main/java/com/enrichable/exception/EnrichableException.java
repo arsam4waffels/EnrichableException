@@ -2,8 +2,6 @@ package com.enrichable.exception;
 
 import com.enrichable.exception.config.ErrorLevel;
 import com.enrichable.exception.config.ExceptionConfiguration;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,9 +17,9 @@ import java.util.Map;
  * EnrichableException: "Allow me to explain exactly how."
  */
 public class EnrichableException extends RuntimeException {
-    private static ExceptionConfiguration config = new ExceptionConfiguration();
-    public static void setConfig(ExceptionConfiguration configuration) {
-        config = configuration;
+    private ExceptionConfiguration config = new ExceptionConfiguration();
+    public void setConfig(ExceptionConfiguration configuration) {
+        this.config = configuration;
     }
     private int exceptionCounter = 0;
     private static class ExceptionInformation {
@@ -91,6 +89,12 @@ public class EnrichableException extends RuntimeException {
         // An error without a severity level? Bold strategy mate.
         if (errorLevel == null)
             throw new IllegalArgumentException("Error level cannot be null.");
+    }
+    private void validateExceptionContext(String exceptionContext) {
+        if (exceptionContext == null)
+            throw new IllegalArgumentException(
+                    "Exception context cannot be null."
+            );
     }
     @Override
     public String toString() { // This is the place were we unpack the trauma XD.
@@ -164,16 +168,14 @@ public class EnrichableException extends RuntimeException {
         );
         return this;
     }
-    @Contract("null -> fail")
-    private @NotNull String normalizeMetadataKey(String key) {
+    private String normalizeMetadataKey(String key) {
         // Metadata without a key? We're not doing anonymous paperwork.
         if (key == null) throw new IllegalArgumentException("Metadata key cannot be null.");
         // Empty is allowed. Unnamed emptiness is not.
         if (key.isBlank()) return "BLANK";
         return key;
     }
-    @Contract("null -> fail")
-    private @NotNull String normalizeMetadataValue(String value) {
+    private String normalizeMetadataValue(String value) {
         if (value == null) throw new IllegalArgumentException("Metadata value cannot be null.");
         if (value.isBlank()) return "BLANK";
         return value;
