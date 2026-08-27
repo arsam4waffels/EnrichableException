@@ -205,7 +205,7 @@ exception.getCause();
 
 Sometimes printing an exception to the console isn't enough.
 
-`EnrichableException` can write a formatted exception report to `errors.log` using:
+`EnrichableException` can write a formatted exception report to `enrichable.log` using:
 
 ```java
 exception.writeLog();
@@ -234,7 +234,7 @@ Example:
     └─ Time : 2026-08-27 11:58:37
 ```
 
-Each call to `writeLog()` appends a new report to `errors.log`.
+Each call to `writeLog()` appends a new report to `enrichable.log`.
 
 Metadata is attached to the specific exception information it belongs to, rather than being shared between all errors.
 
