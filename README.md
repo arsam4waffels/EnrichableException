@@ -22,6 +22,7 @@ It's still a work in progress, but it's slowly becoming something useful.
 * Optional error count
 * Exception cause preservation
 * File logging
+* Error-level log filtering
 * Input validation
 * JUnit 5 tests
 
@@ -236,6 +237,12 @@ Example:
 
 Each call to `writeLog()` appends a new report to `enrichable.log`.
 
+You log only errors with a specific level using `onlyLog()`. The filter only affects file logging; the exception still keeps all its information.
+```text
+exception
+        .onlyLog(ErrorLevel.CRITICAL)
+        .writeLog();
+```
 Metadata is attached to the specific exception information it belongs to, rather than being shared between all errors.
 
 

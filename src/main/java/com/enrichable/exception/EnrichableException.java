@@ -95,48 +95,7 @@ public class EnrichableException extends RuntimeException {
         if (errorLevel == null)
             throw new IllegalArgumentException("Error level cannot be null.");
     }
-    private final String exceptionDateTime = LocalDateTime
-            .now()
-            .format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
-    private String buildLogReport() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("════════════════════════════════════════════════════\n");
-        builder.append("  ENRICHABLE EXCEPTION REPORT\n");
-        builder.append("  Total Errors : ")
-                .append(informationList.size())
-                .append("\n");
-        builder.append("  Thrown At    : ")
-                .append(exceptionDateTime)
-                .append("\n");
-        builder.append("════════════════════════════════════════════════════\n");
-        for (int i = 0; i < informationList.size(); i++) {
-            ExceptionInformation exceptionInformation = informationList.get(i);
-            builder.append("\n");
-            builder.append("  [ERROR-")
-                    .append(i + 1)
-                    .append("] [")
-                    .append(exceptionInformation.exceptionErrorLevel)
-                    .append("] [")
-                    .append(exceptionInformation.exceptionContext)
-                    .append(":")
-                    .append(exceptionInformation.exceptionCode)
-                    .append("]\n");
-            builder.append("  ")
-                    .append(exceptionInformation.exceptionMessage)
-                    .append("\n");
-            builder.append("    └─ Time : ")
-                    .append(exceptionInformation.exceptionDateTime)
-                    .append("\n");
-            for (Map.Entry<String, String> metadata : exceptionInformation.metadataMap.entrySet()) {
-                builder.append("    └─ ")
-                        .append(metadata.getKey())
-                        .append(" : ")
-                        .append(metadata.getValue())
-                        .append("\n");
-            }
-        }
-        return builder.toString();
-    }
+
     @Override
     public String toString() { // This is the place were we unpack the trauma XD.
         StringBuilder stringBuilder = new StringBuilder();
@@ -185,6 +144,54 @@ public class EnrichableException extends RuntimeException {
         }
         return stringBuilder.toString();
     }
+    private final String exceptionDateTime = LocalDateTime
+            .now()
+            .format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+    private String buildLogReport() {
+        StringBuilder builder = new StringBuilder();
+        List<ExceptionInformation> loggableInformation = getLoggableInformation();
+        builder.append("════════════════════════════════════════════════════\n");
+        builder.append("  ENRICHABLE EXCEPTION REPORT\n");
+        builder.append("  Total Errors : ")
+                .append(loggableInformation.size())
+                .append("\n");
+        builder.append("  Thrown At    : ")
+                .append(exceptionDateTime)
+                .append("\n");
+        builder.append("════════════════════════════════════════════════════\n");
+        for (int i = 0; i < loggableInformation.size(); i++) {
+            ExceptionInformation exceptionInformation = loggableInformation.get(i);
+            // Only the chosen ones make it to the log.
+            if (logErrorLevelFilter != null
+                    && exceptionInformation.exceptionErrorLevel != logErrorLevelFilter)
+                continue;
+
+            builder.append("\n");
+            builder.append("  [ERROR-")
+                    .append(i + 1)
+                    .append("] [")
+                    .append(exceptionInformation.exceptionErrorLevel)
+                    .append("] [")
+                    .append(exceptionInformation.exceptionContext)
+                    .append(":")
+                    .append(exceptionInformation.exceptionCode)
+                    .append("]\n");
+            builder.append("  ")
+                    .append(exceptionInformation.exceptionMessage)
+                    .append("\n");
+            builder.append("    └─ Time : ")
+                    .append(exceptionInformation.exceptionDateTime)
+                    .append("\n");
+            for (Map.Entry<String, String> metadata : exceptionInformation.metadataMap.entrySet()) {
+                builder.append("    └─ ")
+                        .append(metadata.getKey())
+                        .append(" : ")
+                        .append(metadata.getValue())
+                        .append("\n");
+            }
+        }
+        return builder.toString();
+    }
     public void writeLog() {
         String result = buildLogReport();
         logToFile(result);
@@ -198,6 +205,21 @@ public class EnrichableException extends RuntimeException {
             // Peak comedy.
             System.out.println("[The error logger failed while logging an error.] " + e.getMessage());
         }
+    }
+    private ErrorLevel logErrorLevelFilter;
+    // Because sometimes you only want the important stuff.
+    public EnrichableException onlyLog(ErrorLevel errorLevel) {
+        validateErrorLevel(errorLevel);
+        this.logErrorLevelFilter = errorLevel;
+        return this;
+    }
+    // Keep the exception intact. We're filtering the log, not rewriting history.
+    private List<ExceptionInformation> getLoggableInformation() {
+        if (logErrorLevelFilter == null)
+            return informationList;
+        return informationList.stream()
+                .filter(info -> info.exceptionErrorLevel == logErrorLevelFilter)
+                .toList();
     }
     // Give the error some receipts.
     public EnrichableException addMetaData(String key, String value) {

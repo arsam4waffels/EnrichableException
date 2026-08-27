@@ -2,7 +2,13 @@ package com.enrichable.exception;
 
 import com.enrichable.exception.config.ErrorLevel;
 import com.enrichable.exception.config.ExceptionConfiguration;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class EnrichableExceptionTest {
@@ -490,5 +496,139 @@ class EnrichableExceptionTest {
         );
         assertThrows(IllegalArgumentException.class,
                 () -> exception.setConfig(null));
+    }
+    @BeforeEach
+    void cleanLogFile() throws IOException {
+        Files.deleteIfExists(Path.of("enrichable.log"));
+    }
+    @Test
+    void shouldLogOnlyCriticalErrorsWhenCriticalFilterIsApplied() throws IOException {
+        // We have three problems. Apparently, one wasn't enough.
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING
+                        )
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.ERROR
+                        )
+                        .onlyLog(ErrorLevel.CRITICAL);
+        exception.writeLog();
+        String log = Files.readString(Path.of("enrichable.log"));
+        System.out.println("LOG:");
+        System.out.println(log);
+        assertTrue(log.contains("[CRITICAL] [DATABASE:DB-001]"));
+        assertFalse(log.contains("[WARNING] [CACHE:CACHE-001]"));
+        assertFalse(log.contains("[ERROR] [AUTH:AUTH-001]"));
+    }
+    @Test
+    void shouldLogAllErrorsWhenNoFilterIsApplied() throws IOException {
+        // No filter means nobody gets kicked out of the report.
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING
+                        );
+        exception.writeLog();
+        String log = Files.readString(Path.of("enrichable.log"));
+        assertTrue(log.contains("[CRITICAL] [DATABASE:DB-001]"));
+        assertTrue(log.contains("[WARNING] [CACHE:CACHE-001]"));
+    }
+    @Test
+    void shouldLogAllErrorsMatchingSelectedLevel() throws IOException {
+        // Two critical errors. The filter should not stop after finding the first one.
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database connection failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addInformation(
+                                "PAYMENT",
+                                "PAY-001",
+                                "Payment processing failed",
+                                ErrorLevel.CRITICAL
+                        )
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache unavailable",
+                                ErrorLevel.WARNING
+                        )
+                        .onlyLog(ErrorLevel.CRITICAL);
+        exception.writeLog();
+        String log = Files.readString(Path.of("enrichable.log"));
+        assertTrue(log.contains("[CRITICAL] [DATABASE:DB-001]"));
+        assertTrue(log.contains("[CRITICAL] [PAYMENT:PAY-001]"));
+        assertFalse(log.contains("[WARNING] [CACHE:CACHE-001]"));
+    }
+    @Test
+    void shouldLogEmptyReportWhenNoErrorMatchesFilter() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING
+                        )
+                        .onlyLog(ErrorLevel.ERROR);
+        exception.writeLog();
+        String log = Files.readString(Path.of("enrichable.log"));
+        assertTrue(log.contains("ENRICHABLE EXCEPTION REPORT"));
+        assertTrue(log.contains("Total Errors : 0"));
+        assertFalse(log.contains("[CRITICAL]"));
+        assertFalse(log.contains("[WARNING]"));
+    }
+    @Test
+    void shouldNotFilterToStringWhenLogFilterIsApplied() {
+        // Logging can be selective. The exception itself should remember everything.
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING
+                        )
+                        .onlyLog(ErrorLevel.CRITICAL);
+        String result = exception.toString();
+        assertTrue(result.contains("[DATABASE:DB-001]"));
+        assertTrue(result.contains("[CACHE:CACHE-001]"));
     }
 }
