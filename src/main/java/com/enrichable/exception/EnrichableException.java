@@ -19,10 +19,14 @@ import java.util.Map;
 public class EnrichableException extends RuntimeException {
     private ExceptionConfiguration config = new ExceptionConfiguration();
     public void setConfig(ExceptionConfiguration configuration) {
+        if (configuration == null) throw new IllegalArgumentException(
+                "Exception configuration cannot be null."
+        );
         this.config = configuration;
     }
+    // Time of death, formatted for the record.
     private final static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static class ExceptionInformation {
+    private final static class ExceptionInformation {
         String exceptionContext;        // Where the damage happened
         String exceptionCode;           // The error's ID card
         String exceptionMessage;        // What actually went wrong
@@ -44,9 +48,8 @@ public class EnrichableException extends RuntimeException {
             this.exceptionErrorLevel = exceptionErrorLevel;
         }
     }
-    // The MC, who is gonna carry all the exceptions
-    @SuppressWarnings("all")
-    private List<ExceptionInformation> informationList = new ArrayList<>();
+    // Wall of shame. Every entry earned its place.
+    private final List<ExceptionInformation> informationList = new ArrayList<>();
     public EnrichableException(String exceptionContext,
                                String exceptionCode,
                                String exceptionMessage,
@@ -189,7 +192,7 @@ public class EnrichableException extends RuntimeException {
     // Because apparently printing it isn't enough.
     private void logToFile(String content) {
         // Dear future me, good luck debugging this.
-        try (FileWriter writer = new FileWriter("errors.log", true)) {
+        try (FileWriter writer = new FileWriter("enrichable.log", true)) {
             writer.write(content);
         } catch (IOException e) {
             // Peak comedy.

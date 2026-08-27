@@ -9,6 +9,7 @@ bin/
 
 # Logs
 *.log
+!enrichable.log
 
 # Eclipse
 .classpath

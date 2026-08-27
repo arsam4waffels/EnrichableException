@@ -471,4 +471,24 @@ class EnrichableExceptionTest {
         assertTrue(result.contains("[requestId=req-abc-999]"));
         assertTrue(result.contains("[retryCount=3]"));
     }
+    @Test
+    void shouldRejectNullConfiguration() {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addMetaData("userId", "1042")
+                        .addMetaData("requestId", "req-abc-999")
+                        .addMetaData("retryCount", "3");
+        exception.setConfig(
+                new ExceptionConfiguration()
+                        .setShowMetadata(true)
+        );
+        assertThrows(IllegalArgumentException.class,
+                () -> exception.setConfig(null));
+    }
 }
