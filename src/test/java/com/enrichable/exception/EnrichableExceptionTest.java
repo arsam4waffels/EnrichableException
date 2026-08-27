@@ -395,4 +395,80 @@ class EnrichableExceptionTest {
         // Fluent methods should return the same object, not create a new one.
         assertSame(exception, result);
     }
+    @Test
+    void shouldKeepMetadataAttachedToItsException() {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addMetaData("userId", "1042")
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.WARNING
+                        )
+                        .addMetaData("userId", "2048");
+        exception.setConfig(
+                new ExceptionConfiguration()
+                        .setShowMetadata(true)
+        );
+        String result = exception.toString();
+        assertTrue(result.contains("[userId=1042]"));
+        assertTrue(result.contains("[userId=2048]"));
+    }
+    @Test
+    void shouldNotLeakMetadataBetweenExceptions() {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addMetaData("userId", "1042")
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.WARNING
+                        );
+        exception.setConfig(
+                new ExceptionConfiguration()
+                        .setShowMetadata(true)
+        );
+        String result = exception.toString();
+        int databaseStart = result.indexOf("[DATABASE:DB-001] Database failed");
+        int authStart = result.indexOf("[AUTH:AUTH-001] Authentication failed");
+        String databaseSection = result.substring(databaseStart, authStart);
+        assertTrue(databaseSection.contains("[userId=1042]"));
+        assertFalse(databaseSection.contains("2048"));
+    }
+    @Test
+    void shouldSupportMultipleMetadataEntriesForOneException() {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                )
+                        .addMetaData("userId", "1042")
+                        .addMetaData("requestId", "req-abc-999")
+                        .addMetaData("retryCount", "3");
+        exception.setConfig(
+                new ExceptionConfiguration()
+                        .setShowMetadata(true)
+        );
+        String result = exception.toString();
+        assertTrue(result.contains("[userId=1042]"));
+        assertTrue(result.contains("[requestId=req-abc-999]"));
+        assertTrue(result.contains("[retryCount=3]"));
+    }
 }

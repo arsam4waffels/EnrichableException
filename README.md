@@ -203,13 +203,41 @@ exception.getCause();
 
 ## Logging
 
-If you want to write the exception to the log file:
+Sometimes printing an exception to the console isn't enough.
+
+`EnrichableException` can write a formatted exception report to `errors.log` using:
 
 ```java
-exception.log();
+exception.writeLog();
 ```
 
-That's it.
+The generated report keeps each error and its metadata together, so things don't turn into a wall of random error messages.
+
+Example:
+
+```text
+════════════════════════════════════════════════════
+  ENRICHABLE EXCEPTION REPORT
+  Total Errors : 2
+  Thrown At    : 2026-08-27 11:58:37
+════════════════════════════════════════════════════
+
+  [ERROR-1] [CRITICAL] [DATABASE:DB-001]
+  Failed to execute query: table 'users' not found
+    └─ Time : 2026-08-27 11:58:37
+    └─ retryCount : 3
+    └─ query : SELECT * FROM users
+    └─ userId : 1042
+
+  [ERROR-2] [WARNING] [DATABASE-SIZE:DB-002]
+  Failed to execute query: table 'users-info' not found
+    └─ Time : 2026-08-27 11:58:37
+```
+
+Each call to `writeLog()` appends a new report to `errors.log`.
+
+Metadata is attached to the specific exception information it belongs to, rather than being shared between all errors.
+
 
 ---
 
@@ -309,7 +337,38 @@ databaseError.log();
 ```
 
 ---
+## Why EnrichableException?
 
+Java already provides `Throwable.addSuppressed()` for attaching additional exceptions to a throwable. That's useful, but it solves a different problem.
+
+| Feature                                 | `Throwable.addSuppressed()`      | `EnrichableException`            |
+| --------------------------------------- | -------------------------------- | -------------------------------- |
+| Attach another `Throwable`              | Yes                              | Yes, through the exception cause |
+| Add structured error information        | No                               | Yes                              |
+| Error context                           | No                               | Yes                              |
+| Error code                              | No                               | Yes                              |
+| Error level                             | No                               | Yes                              |
+| Timestamp per error                     | No                               | Yes                              |
+| Custom metadata                         | No                               | Yes                              |
+| Multiple related error entries          | Limited to suppressed exceptions | Yes                              |
+| Configurable output                     | No                               | Yes                              |
+| Formatted error report                  | No                               | Yes                              |
+| Designed for structured error reporting | No                               | Yes                              |
+
+`addSuppressed()` is mainly useful when one operation encounters additional exceptions that should not replace the original exception.
+
+`EnrichableException` is designed for a different job: **making errors carry structured, human-readable context that can be logged and inspected later.**
+
+So this isn't really:
+
+> "Java's way vs. our way."
+
+It's more like:
+
+> **`addSuppressed()` tells you what other exceptions happened.
+> `EnrichableException` tells you what happened, where, why, how severe it was, and gives you extra context to investigate it.**
+
+---
 ## Project Status
 
 This is still an active little side project.

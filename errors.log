@@ -1,54 +1,16 @@
+════════════════════════════════════════════════════
+  ENRICHABLE EXCEPTION REPORT
+  Total Errors : 2
+  Thrown At    : 2026-08-27 12:18:47
+════════════════════════════════════════════════════
 
-[DATABASE:ERR1][USER_REPOSITORY:ERR2]
-[ERROR-1][2026-08-25 19:15:16][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
-[ERROR-2][2026-08-25 19:15:16][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
+  [ERROR-1] [CRITICAL] [DATABASE:DB-001]
+  Connection failed
+    └─ Time : 2026-08-27 12:18:47
+    └─ requestID : req-abc-999
+    └─ userID : 1234
 
----
-[2-ERRORS]
-[DATABASE:ERR1][USER_REPOSITORY:ERR2]
-[ERROR-1][2026-08-25 19:28:42][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
-[ERROR-2][2026-08-25 19:28:42][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
-
----
-[2-ERRORS][DATABASE:ERR1][USER_REPOSITORY:ERR2]
-[ERROR-1][2026-08-25 22:03:53][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
-[ERROR-2][2026-08-25 22:03:53][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
-
----
-[2-ERRORS][DATABASE:ERR1][USER_REPOSITORY:ERR2]
-[ERROR-1][2026-08-25 22:05:51][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
-[ERROR-2][2026-08-25 22:05:51][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
-
----
-[2-ERRORS][DATABASE:ERR1][USER_REPOSITORY:ERR2]
-[ERROR-1][2026-08-25 22:06:24][CRITICAL][DATABASE:ERR1] Failed to execute query: table 'users' not found
-[ERROR-2][2026-08-25 22:06:24][ERROR][USER_REPOSITORY:ERR2] Failed to fetch user with ID: 1042
-
----
-[3-ERRORS][DATABASE:DB-001][USER_REPOSITORY:REPO-002][AUTH_SERVICE:AUTH-003]
-[ERROR-1][2026-08-25 22:09:16][CRITICAL][DATABASE:DB-001] Failed to execute database query.
-[ERROR-2][2026-08-25 22:09:16][ERROR][USER_REPOSITORY:REPO-002] Failed to fetch user with ID: 1042.
-[ERROR-3][2026-08-25 22:09:16][WARNING][AUTH_SERVICE:AUTH-003] Could not verify user identity.
-[database=users]
-[userId=1042]
-[operation=login]
-
----
-[3-ERRORS][DATABASE:DB-001][USER_REPOSITORY:REPO-002][AUTH_SERVICE:AUTH-003]
-[ERROR-1][2026-08-25 22:09:32][CRITICAL][DATABASE:DB-001] Failed to execute database query.
-[ERROR-2][2026-08-25 22:09:32][ERROR][USER_REPOSITORY:REPO-002] Failed to fetch user with ID: 1042.
-[ERROR-3][2026-08-25 22:09:32][WARNING][AUTH_SERVICE:AUTH-003] Could not verify user identity.
-[database=users]
-[userId=1042]
-[operation=login]
-
----
-[3-ERRORS][DATABASE:DB-001][USER_REPOSITORY:REPO-002][AUTH_SERVICE:AUTH-003]
-[ERROR-1][2026-08-25 22:09:47][CRITICAL][DATABASE:DB-001] Failed to execute database query.
-[ERROR-2][2026-08-25 22:09:47][ERROR][USER_REPOSITORY:REPO-002] Failed to fetch user with ID: 1042.
-[ERROR-3][2026-08-25 22:09:47][WARNING][AUTH_SERVICE:AUTH-003] Could not verify user identity.
-[database=users]
-[userId=1042]
-[operation=login]
-
----
+  [ERROR-2] [WARNING] [CACHE:CACHE-004]
+  Cache was unavailable
+    └─ Time : 2026-08-27 12:18:47
+    └─ cacheName : user-cache
