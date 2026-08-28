@@ -3,7 +3,6 @@ package com.enrichable.exception;
 import com.enrichable.exception.config.ErrorLevel;
 import com.enrichable.exception.config.ExceptionConfiguration;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,16 +27,17 @@ public class EnrichableException extends RuntimeException {
         );
         this.config = configuration;
     }
+    private static final Object LOG_LOCK = new Object();
     // Time of death, formatted for the record.
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter  DATE_TIME_FORMATER =
             DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
     private static final class ExceptionInformation {
-        String exceptionContext;        // Where the damage happened
-        String exceptionCode;           // The error's ID card
-        String exceptionMessage;        // What actually went wrong
-        String exceptionDateTime;       // When the chaos happened?
-        ErrorLevel exceptionErrorLevel; // How doomed are we?
+        final String exceptionContext;        // Where the damage happened
+        final String exceptionCode;           // The error's ID card
+        final String exceptionMessage;        // What actually went wrong
+        final String exceptionDateTime;       // When the chaos happened?
+        final ErrorLevel exceptionErrorLevel; // How doomed are we?
 
         private final Map<String, String> metadataMap = new HashMap<>();
 
@@ -200,19 +200,21 @@ public class EnrichableException extends RuntimeException {
     }
     // Because apparently printing it isn't enough.
     private void logToFile(String content) {
-        try (var writer = Files.newBufferedWriter(
-                Path.of("enrichable.log"),
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.APPEND
-        )) {
-            writer.write(content);
-        } catch (IOException e) {
-            // Peak comedy
-            System.err.println(
-                    "[The error logger failed while logging an error.] "
-                            + e.getMessage()
-            );
+        synchronized (LOG_LOCK) {
+            try (var writer = Files.newBufferedWriter(
+                    Path.of("enrichable.log"),
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+            )) {
+                writer.write(content);
+            } catch (IOException e) {
+                // Peak comedy
+                System.err.println(
+                        "[The error logger failed while logging an error.] "
+                                + e.getMessage()
+                );
+            }
         }
     }
     private ErrorLevel logErrorLevelFilter;

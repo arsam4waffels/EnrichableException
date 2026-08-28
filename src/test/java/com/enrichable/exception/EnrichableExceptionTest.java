@@ -631,4 +631,33 @@ class EnrichableExceptionTest {
         assertTrue(result.contains("[DATABASE:DB-001]"));
         assertTrue(result.contains("[CACHE:CACHE-001]"));
     }
+    @Test
+    void shouldWriteConcurrentReportsWithoutInterleaving() throws Exception {
+        EnrichableException first =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null
+                );
+        EnrichableException second =
+                new EnrichableException(
+                        "AUTH",
+                        "AUTH-001",
+                        "Authentication failed",
+                        ErrorLevel.WARNING,
+                        null
+                );
+        Thread firstThread = new Thread(first::writeLog);
+        Thread secondThread = new Thread(second::writeLog);
+        firstThread.start();
+        secondThread.start();
+        firstThread.join();
+        secondThread.join();
+
+        String log = Files.readString(Path.of("enrichable.log"));
+        assertTrue(log.contains("[DATABASE:DB-001]"));
+        assertTrue(log.contains("[AUTH:AUTH-001]"));
+    }
 }

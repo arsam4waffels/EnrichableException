@@ -21,7 +21,7 @@ It's still a work in progress, but it's slowly becoming something useful.
 * Optional timestamps
 * Optional error count
 * Exception cause preservation
-* File logging
+* Thread-safe file logging
 * Error-level log filtering
 * Input validation
 * JUnit 5 tests
@@ -237,7 +237,10 @@ Example:
 
 Each call to `writeLog()` appends a new report to `enrichable.log`.
 
-You log only errors with a specific level using `onlyLog()`. The filter only affects file logging; the exception still keeps all its information.
+File logging is thread-safe, so concurrent exceptions can safely write to the shared `enrichable.log` file without interleaving their reports.
+
+You can use `onlyLog()` to log only errors with a specific level. The filter only affects file logging; all exception information is still preserved.
+
 ```text
 exception
         .onlyLog(ErrorLevel.CRITICAL)
@@ -256,10 +259,8 @@ Required text values cannot be `null` or blank.
 
 Metadata also has a few rules:
 
-* `null` keys are rejected.
-* `null` values are rejected.
-* Blank keys become `BLANK`.
-* Blank values become `BLANK`.
+* `null` keys & values are rejected.
+* Blank keys & values become `BLANK`.
 
 For example:
 
@@ -306,6 +307,9 @@ The tests currently cover things like:
 * Exception causes
 * Multiple error information
 * Output behavior
+* File logging
+* Log-level filtering
+* Thread-safe file logging
 
 ---
 
@@ -372,14 +376,12 @@ So this isn't really:
 
 It's more like:
 
-> **`addSuppressed()` tells you what other exceptions happened.
-> `EnrichableException` tells you what happened, where, why, how severe it was, and gives you extra context to investigate it.**
+> `addSuppressed()` tells you what other exceptions happened.
+> `EnrichableException` tells you what happened, where, why, how severe it was, and gives you extra context to investigate it.
 
 ---
 ## Project Status
 
-This is still an active little side project.
+This project is actively evolving as I continue exploring better ways to design and manage exceptions in Java.
 
-Whenever I feel like adding something to it, I'll probably add it.
-
-The API and design may change as the project grows.
+It is still a work in progress, and the API and design may change as the project grows.
