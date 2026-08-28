@@ -340,7 +340,7 @@ databaseError.setConfig(
 
 System.out.println(databaseError);
 
-databaseError.log();
+databaseError.writeLog();
 ```
 
 ---

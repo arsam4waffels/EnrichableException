@@ -7,6 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +29,10 @@ public class EnrichableException extends RuntimeException {
         this.config = configuration;
     }
     // Time of death, formatted for the record.
-    private final static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private final static class ExceptionInformation {
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter  DATE_TIME_FORMATER =
+            DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    private static final class ExceptionInformation {
         String exceptionContext;        // Where the damage happened
         String exceptionCode;           // The error's ID card
         String exceptionMessage;        // What actually went wrong
@@ -44,7 +50,7 @@ public class EnrichableException extends RuntimeException {
             this.exceptionMessage = exceptionMessage;
             this.exceptionDateTime = LocalDateTime
                     .now()
-                    .format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+                    .format(DATE_TIME_FORMATER);
             this.exceptionErrorLevel = exceptionErrorLevel;
         }
     }
@@ -146,7 +152,7 @@ public class EnrichableException extends RuntimeException {
     }
     private final String exceptionDateTime = LocalDateTime
             .now()
-            .format(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+            .format(DATE_TIME_FORMATER);
     private String buildLogReport() {
         StringBuilder builder = new StringBuilder();
         List<ExceptionInformation> loggableInformation = getLoggableInformation();
@@ -161,10 +167,6 @@ public class EnrichableException extends RuntimeException {
         builder.append("════════════════════════════════════════════════════\n");
         for (int i = 0; i < loggableInformation.size(); i++) {
             ExceptionInformation exceptionInformation = loggableInformation.get(i);
-            // Only the chosen ones make it to the log.
-            if (logErrorLevelFilter != null
-                    && exceptionInformation.exceptionErrorLevel != logErrorLevelFilter)
-                continue;
 
             builder.append("\n");
             builder.append("  [ERROR-")
@@ -198,12 +200,19 @@ public class EnrichableException extends RuntimeException {
     }
     // Because apparently printing it isn't enough.
     private void logToFile(String content) {
-        // Dear future me, good luck debugging this.
-        try (FileWriter writer = new FileWriter("enrichable.log", true)) {
+        try (var writer = Files.newBufferedWriter(
+                Path.of("enrichable.log"),
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND
+        )) {
             writer.write(content);
         } catch (IOException e) {
-            // Peak comedy.
-            System.out.println("[The error logger failed while logging an error.] " + e.getMessage());
+            // Peak comedy
+            System.err.println(
+                    "[The error logger failed while logging an error.] "
+                            + e.getMessage()
+            );
         }
     }
     private ErrorLevel logErrorLevelFilter;
@@ -217,6 +226,7 @@ public class EnrichableException extends RuntimeException {
     private List<ExceptionInformation> getLoggableInformation() {
         if (logErrorLevelFilter == null)
             return informationList;
+        // Only the chosen ones make it to the log.
         return informationList.stream()
                 .filter(info -> info.exceptionErrorLevel == logErrorLevelFilter)
                 .toList();
