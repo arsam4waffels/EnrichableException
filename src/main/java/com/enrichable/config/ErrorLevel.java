@@ -1,4 +1,4 @@
-package com.enrichable.exception.config;
+package com.enrichable.config;
 
 public enum ErrorLevel {
     /*

@@ -1,4 +1,4 @@
-package com.enrichable.exception.config;
+package com.enrichable.config;
 
 public class ExceptionConfiguration {
     // By default: we pretend everything is fine.

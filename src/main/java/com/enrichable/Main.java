@@ -1,7 +1,6 @@
-package com.enrichable.exception;
+package com.enrichable;
 
-import com.enrichable.exception.config.ErrorLevel;
-import com.enrichable.exception.config.ExceptionConfiguration;
+import com.enrichable.config.ErrorLevel;
 
 public class Main {
     public static void main3() {

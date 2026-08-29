@@ -1,7 +1,7 @@
-package com.enrichable.exception;
+package com.enrichable;
 
-import com.enrichable.exception.config.ErrorLevel;
-import com.enrichable.exception.config.ExceptionConfiguration;
+import com.enrichable.config.ErrorLevel;
+import com.enrichable.config.ExceptionConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
