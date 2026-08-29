@@ -25,6 +25,7 @@ It's still a work in progress, but it's slowly becoming something useful.
 * Error-level log filtering
 * Input validation
 * JUnit 5 tests
+* Annotation for custom exception classes
 
 ---
 
@@ -107,9 +108,9 @@ You can also attach extra key-value information:
 
 ```java
 exception
-        .addMetaData("userId", "1042")
-        .addMetaData("query", "SELECT * FROM users")
-        .addMetaData("retryCount", "3");
+        .addMetadata("userId", "1042")
+        .addMetadata("query", "SELECT * FROM users")
+        .addMetadata("retryCount", "3");
 ```
 
 Whether metadata appears in the output is controlled by the configuration:
@@ -250,6 +251,41 @@ Metadata is attached to the specific exception information it belongs to, rather
 
 
 ---
+## Annotations
+
+Instead of repeating context, codes, and levels every time, you can define them once on the class itself.
+
+`@EnrichableHandler` goes on service classes:
+
+```java
+@EnrichableHandler(context = "Database", defaultLevel = ErrorLevel.CRITICAL)
+public class DatabaseService {
+    public void connect() {
+        throw AnnotationProcessor.processHandler(
+                DatabaseService.class,
+                "DB-001",
+                "Connection failed"
+        );
+    }
+}
+```
+
+`@EnrichableCode` goes on custom exception classes:
+
+```java
+@EnrichableCode(code = "DB-001", level = ErrorLevel.CRITICAL)
+public class DatabaseConnectionException extends EnrichableException { ... }
+
+throw AnnotationProcessor.processCode(
+        DatabaseConnectionException.class,
+        "Database",
+        "Connection failed"
+);
+```
+
+The annotated values are picked up automatically.
+
+---
 
 ## Validation
 
@@ -265,7 +301,7 @@ Metadata also has a few rules:
 For example:
 
 ```java
-exception.addMetaData("", "user-6969");
+exception.addMetadata("", "user-6969");
 ```
 
 becomes:
@@ -277,7 +313,7 @@ becomes:
 And:
 
 ```java
-exception.addMetaData("userId", "");
+exception.addMetadata("userId", "");
 ```
 
 becomes:
@@ -330,9 +366,9 @@ EnrichableException databaseError =
         );
 
 databaseError
-        .addMetaData("userId", "1042")
-        .addMetaData("query", "SELECT * FROM users")
-        .addMetaData("retryCount", "3");
+        .addMetadata("userId", "1042")
+        .addMetadata("query", "SELECT * FROM users")
+        .addMetadata("retryCount", "3");
 
 databaseError.setConfig(
         new ExceptionConfiguration()
@@ -365,6 +401,7 @@ Java already provides `Throwable.addSuppressed()` for attaching additional excep
 | Configurable output                     | No                               | Yes                              |
 | Formatted error report                  | No                               | Yes                              |
 | Designed for structured error reporting | No                               | Yes                              |
+| Annotation-based exception creation     | No                               | Yes                              |
 
 `addSuppressed()` is mainly useful when one operation encounters additional exceptions that should not replace the original exception.
 
