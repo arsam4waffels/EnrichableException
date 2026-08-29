@@ -21,7 +21,7 @@ public class Main {
                     "CODE-22",
                     "More information on what happened",
                     ErrorLevel.CRITICAL
-            ).addMetaData("Key1", "Value2").addMetaData("Key2", "Value2");
+            ).addMetadata("Key1", "Value2").addMetadata("Key2", "Value2");
             throw e;
         }
     }
@@ -34,7 +34,7 @@ public class Main {
                     "CODE-33",
                     "More information on what happened",
                     ErrorLevel.CRITICAL
-            ).addMetaData("Key3", "Value3").addMetaData("Key4", "Value4");
+            ).addMetadata("Key3", "Value3").addMetadata("Key4", "Value4");
             throw e;
         }
     }
@@ -42,7 +42,7 @@ public class Main {
         try {
             main1();
         } catch (EnrichableException e) {
-            e.addMetaData("WeAre", "Home").writeLog();
+            e.addMetadata("WeAre", "Home").writeLog();
         }
     }
 }

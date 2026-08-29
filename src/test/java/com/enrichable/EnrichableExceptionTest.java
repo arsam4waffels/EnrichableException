@@ -1,7 +1,7 @@
 package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
-import com.enrichable.config.ExceptionConfiguration;
+import com.enrichable.config.EnrichConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +55,7 @@ class EnrichableExceptionTest {
                         null
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowErrorLevel(true)
         );
         String result = exception.toString();
@@ -77,7 +77,7 @@ class EnrichableExceptionTest {
                         null
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowErrorLevel(false)
         );
         String result = exception.toString();
@@ -102,7 +102,7 @@ class EnrichableExceptionTest {
                 );
         assertThrows(
                 IllegalArgumentException.class,
-                () -> exception.addMetaData(null, "null")
+                () -> exception.addMetadata(null, "null")
         );
     }
     /**
@@ -123,7 +123,7 @@ class EnrichableExceptionTest {
                 );
         assertThrows(
                 IllegalArgumentException.class,
-                () -> exception.addMetaData("null", null)
+                () -> exception.addMetadata("null", null)
         );
     }
     /**
@@ -141,10 +141,10 @@ class EnrichableExceptionTest {
                         "Database connection failed",
                         ErrorLevel.CRITICAL,
                         null
-                ).addMetaData("","user-6969");
+                ).addMetadata("","user-6969");
 
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -166,10 +166,10 @@ class EnrichableExceptionTest {
                         "Database connection failed",
                         ErrorLevel.CRITICAL,
                         null
-                ).addMetaData("userID","");
+                ).addMetadata("userID","");
 
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -192,10 +192,10 @@ class EnrichableExceptionTest {
                         "Database connection failed",
                         ErrorLevel.CRITICAL,
                         null
-                ).addMetaData("userID","1234");
+                ).addMetadata("userID","1234");
 
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(false)
         );
         String result = exception.toString();
@@ -221,7 +221,7 @@ class EnrichableExceptionTest {
                         ErrorLevel.WARNING
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowErrorCount(true)
         );
         String result = exception.toString();
@@ -249,7 +249,7 @@ class EnrichableExceptionTest {
                         ErrorLevel.WARNING
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowErrorCount(false)
         );
         String result = exception.toString();
@@ -324,7 +324,7 @@ class EnrichableExceptionTest {
                         null
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowTimestamp(true)
         );
         String result = exception.toString();
@@ -371,7 +371,7 @@ class EnrichableExceptionTest {
                         null
                 );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowTimestamp(false)
         );
         String result = exception.toString();
@@ -411,16 +411,16 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 )
-                        .addMetaData("userId", "1042")
+                        .addMetadata("userId", "1042")
                         .addInformation(
                                 "AUTH",
                                 "AUTH-001",
                                 "Authentication failed",
                                 ErrorLevel.WARNING
                         )
-                        .addMetaData("userId", "2048");
+                        .addMetadata("userId", "2048");
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -437,7 +437,7 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 )
-                        .addMetaData("userId", "1042")
+                        .addMetadata("userId", "1042")
                         .addInformation(
                                 "AUTH",
                                 "AUTH-001",
@@ -445,7 +445,7 @@ class EnrichableExceptionTest {
                                 ErrorLevel.WARNING
                         );
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -465,11 +465,11 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 )
-                        .addMetaData("userId", "1042")
-                        .addMetaData("requestId", "req-abc-999")
-                        .addMetaData("retryCount", "3");
+                        .addMetadata("userId", "1042")
+                        .addMetadata("requestId", "req-abc-999")
+                        .addMetadata("retryCount", "3");
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -487,11 +487,11 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 )
-                        .addMetaData("userId", "1042")
-                        .addMetaData("requestId", "req-abc-999")
-                        .addMetaData("retryCount", "3");
+                        .addMetadata("userId", "1042")
+                        .addMetadata("requestId", "req-abc-999")
+                        .addMetadata("retryCount", "3");
         exception.setConfig(
-                new ExceptionConfiguration()
+                new EnrichConfiguration()
                         .setShowMetadata(true)
         );
         assertThrows(IllegalArgumentException.class,
