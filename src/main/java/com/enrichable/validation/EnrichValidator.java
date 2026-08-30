@@ -18,4 +18,12 @@ public final class EnrichValidator {
         if (obj == null)
             throw new IllegalArgumentException(fieldName + " cannot be null.");
     }
+    public static String normalizeMetadataKey(String key) {
+        if (key == null) throw new IllegalArgumentException("Metadata key cannot be null.");
+        return key.isBlank() ? "BLANK" : key;
+    }
+    public static String normalizeMetadataValue(String value) {
+        if (value == null) throw new IllegalArgumentException("Metadata value cannot be null.");
+        return value.isBlank() ? "BLANK" : value;
+    }
 }

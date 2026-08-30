@@ -40,7 +40,7 @@ public class EnrichableException extends RuntimeException {
                                               String message,
                                               ErrorLevel level) {
         EnrichValidator.requireNonBlank(context, "Exception context");
-        EnrichValidator.requireNonBlank(code,    "Exception code");
+        EnrichValidator.requireNonBlank(code, "Exception code");
         EnrichValidator.requireNonBlank(message, "Exception message");
         EnrichValidator.requireNonNull(level);
         informationList.add(new EnrichInformation(context, code, message, level));
@@ -51,8 +51,8 @@ public class EnrichableException extends RuntimeException {
         if (informationList.isEmpty())
             throw new IllegalStateException("Cannot add metadata without exception information.");
         informationList.getLast().addMetadata(
-                normalizeKey(key),
-                normalizeValue(value)
+                EnrichValidator.normalizeMetadataKey(key),
+                EnrichValidator.normalizeMetadataValue(value)
         );
         return this;
     }
@@ -77,13 +77,5 @@ public class EnrichableException extends RuntimeException {
         return informationList.stream()
                 .filter(i -> i.getErrorLevel() == logFilter)
                 .toList();
-    }
-    private String normalizeKey(String key) {
-        if (key == null) throw new IllegalArgumentException("Metadata key cannot be null.");
-        return key.isBlank() ? "BLANK" : key;
-    }
-    private String normalizeValue(String value) {
-        if (value == null) throw new IllegalArgumentException("Metadata value cannot be null.");
-        return value.isBlank() ? "BLANK" : value;
     }
 }
