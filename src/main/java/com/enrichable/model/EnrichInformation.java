@@ -4,8 +4,8 @@ import com.enrichable.config.ErrorLevel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EnrichInformation {
     private static final DateTimeFormatter FORMATTER =
@@ -15,7 +15,7 @@ public class EnrichInformation {
     private final String message;
     private final String dateTime;
     private final ErrorLevel errorLevel;
-    private final Map<String, String> metadata = new HashMap<>();
+    private final Map<String, String> metadata = new ConcurrentHashMap<>();
 
     public EnrichInformation(String context,
                                 String code,

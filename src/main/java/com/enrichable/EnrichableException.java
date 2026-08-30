@@ -9,19 +9,19 @@ import com.enrichable.validation.EnrichValidator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /*
  * Regular exceptions: "I failed."
  * EnrichableException: "Allow me to explain exactly how."
  */
 public class EnrichableException extends RuntimeException {
-    private EnrichConfiguration config = new EnrichConfiguration();
-    private ErrorLevel logFilter;
+    private volatile EnrichConfiguration config = new EnrichConfiguration();
+    private volatile ErrorLevel logFilter;
     private final String thrownAt = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-    private final List<EnrichInformation> informationList = new ArrayList<>();
+    private final List<EnrichInformation> informationList = new CopyOnWriteArrayList<>();
     public EnrichableException(String context,
                                String code,
                                String message,
@@ -35,8 +35,10 @@ public class EnrichableException extends RuntimeException {
         this.config = config;
         return this;
     }
-    public EnrichableException addInformation(String context, String code,
-                                              String message, ErrorLevel level) {
+    public synchronized EnrichableException addInformation(String context,
+                                              String code,
+                                              String message,
+                                              ErrorLevel level) {
         EnrichValidator.requireNonBlank(context, "Exception context");
         EnrichValidator.requireNonBlank(code,    "Exception code");
         EnrichValidator.requireNonBlank(message, "Exception message");
@@ -45,7 +47,7 @@ public class EnrichableException extends RuntimeException {
         return this;
     }
     @Deprecated
-    public EnrichableException addMetadata(String key, String value) {
+    public synchronized EnrichableException addMetadata(String key, String value) {
         if (informationList.isEmpty())
             throw new IllegalStateException("Cannot add metadata without exception information.");
         informationList.getLast().addMetadata(
@@ -61,13 +63,16 @@ public class EnrichableException extends RuntimeException {
     }
     public void writeLog() {
         List<EnrichInformation> loggable = getLoggable();
-        new FileEnrichLogger().write(loggable, thrownAt);
+        FileEnrichLogger.getInstance().write(loggable, thrownAt);
     }
     @Override
-    public String toString() {
+    public synchronized String toString() {
         return new DefaultEnrichFormatter(config).format(informationList);
     }
-    private List<EnrichInformation> getLoggable() {
+    public List<EnrichInformation> getInformationList() {
+        return informationList;
+    }
+    private synchronized List<EnrichInformation> getLoggable() {
         if (logFilter == null) return informationList;
         return informationList.stream()
                 .filter(i -> i.getErrorLevel() == logFilter)

@@ -11,10 +11,17 @@ import java.util.Map;
 
 public class FileEnrichLogger {
     private static final Object LOG_LOCK = new Object();
+    private static final FileEnrichLogger INSTANCE = new FileEnrichLogger();
     private static final String LOG_FILE = "enrichable.log";
+    private FileEnrichLogger() {}
     public void write(List<EnrichInformation> list, String thrownAt) {
-        String report = buildReport(list, thrownAt);
-        writeToFile(report);
+        synchronized (LOG_LOCK) {
+            String report = buildReport(list, thrownAt);
+            writeToFile(report);
+        }
+    }
+    public static FileEnrichLogger getInstance() {
+        return INSTANCE;
     }
     private String buildReport(List<EnrichInformation> list, String thrownAt) {
         StringBuilder sb = new StringBuilder();
@@ -50,17 +57,15 @@ public class FileEnrichLogger {
         return sb.toString();
     }
     private void writeToFile(String content) {
-        synchronized (LOG_LOCK) {
-            try (var writer = Files.newBufferedWriter(
-                    Path.of(LOG_FILE),
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND)) {
-                writer.write(content);
-            } catch (IOException e) {
-                System.err.println("[The error logger failed while logging an error.] "
-                        + e.getMessage());
-            }
+        try (var writer = Files.newBufferedWriter(
+                Path.of(LOG_FILE),
+                StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.APPEND)) {
+            writer.write(content);
+        } catch (IOException e) {
+            System.err.println("[The error logger failed while logging an error.] "
+                    + e.getMessage());
         }
     }
 }

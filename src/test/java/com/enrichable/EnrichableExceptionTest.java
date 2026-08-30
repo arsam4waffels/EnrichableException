@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -659,5 +662,132 @@ class EnrichableExceptionTest {
         String log = Files.readString(Path.of("enrichable.log"));
         assertTrue(log.contains("[DATABASE:DB-001]"));
         assertTrue(log.contains("[AUTH:AUTH-001]"));
+    }
+    private EnrichableException exception;
+
+    @BeforeEach
+    void setUp() {
+        exception = new EnrichableException(
+                "Database", "DB-001", "Connection failed", ErrorLevel.CRITICAL, null
+        );
+    }
+    @Test
+    void addInformation_shouldBeSafeUnderConcurrency() throws InterruptedException {
+        int threadCount = 50;
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            int index = i;
+            executor.submit(() -> {
+                try {
+                    latch.await();
+                    exception.addInformation(
+                            "Context-" + index,
+                            "CODE-" + index,
+                            "Message-" + index,
+                            ErrorLevel.ERROR
+                    );
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+
+        latch.countDown();
+        done.await();
+        executor.shutdown();
+
+        assertEquals(51, exception.getInformationList().size());
+    }
+    @Test
+    void addMetadata_shouldBeSafeUnderConcurrency() throws InterruptedException {
+        int threadCount = 50;
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            int index = i;
+            executor.submit(() -> {
+                try {
+                    latch.await();
+                    exception.addMetadata("Key-" + index, "Value-" + index);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+
+        latch.countDown();
+        done.await();
+        executor.shutdown();
+
+        assertEquals(50, exception.getInformationList()
+                .getLast()
+                .getMetadata()
+                .size()
+        );
+    }
+    @Test
+    void toString_shouldBeSafeWhileAddingInformation() throws InterruptedException {
+        int threadCount = 50;
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            int index = i;
+            executor.submit(() -> {
+                try {
+                    latch.await();
+                    if (index % 2 == 0) {
+                        exception.addInformation(
+                                "Context-" + index,
+                                "CODE-" + index,
+                                "Message-" + index,
+                                ErrorLevel.ERROR
+                        );
+                    } else {
+                        assertDoesNotThrow(() -> exception.toString());
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+        latch.countDown();
+        done.await();
+        executor.shutdown();
+    }
+    @Test
+    void writeLog_shouldBeSafeUnderConcurrency() throws InterruptedException {
+        int threadCount = 20;
+        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch done = new CountDownLatch(threadCount);
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            executor.submit(() -> {
+                try {
+                    latch.await();
+                    assertDoesNotThrow(() -> exception.writeLog());
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } finally {
+                    done.countDown();
+                }
+            });
+        }
+        latch.countDown();
+        done.await();
+        executor.shutdown();
     }
 }

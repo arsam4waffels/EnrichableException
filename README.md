@@ -26,6 +26,7 @@ It's still a work in progress, but it's slowly becoming something useful.
 * Input validation
 * JUnit 5 tests
 * Annotation for custom exception classes
+* Thread-safe exception building
 
 ---
 
@@ -346,6 +347,10 @@ The tests currently cover things like:
 * File logging
 * Log-level filtering
 * Thread-safe file logging
+* Concurrent exception building
+* Concurrent metadata writing
+* Simultaneous read and write operations
+* Concurrent file logging
 
 ---
 
