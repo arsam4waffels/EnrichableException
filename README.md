@@ -1,4 +1,4 @@
-# Enrichable-Exception
+# Enrichable
 
 Java exceptions were starting to drive me a little crazy.
 
@@ -6,10 +6,41 @@ A message, a stack trace, maybe a cause... and when an error gets a little more 
 
 So I decided to make them a bit more organized.
 
-**Enrichable-Exception** is a small Java library for creating exceptions that can carry more useful information, metadata, error levels, and configuration without turning the code into a mess.
+**Enrichable** is a small Java library for creating exceptions that can carry more useful information, metadata, error levels, and configuration without turning the code into a mess.
 
 It's still a work in progress, but it's slowly becoming something useful.
 
+---
+
+## Project Structure
+
+```
+src/main/java/com/enrichable/
+│   EnrichableException.java        ← Core exception — carries errors, metadata, config and cause
+│   Main.java                       ← Entry point / usage examples
+│
+├── annotation/
+│   ├── AnnotationProcessor.java    ← Reads @EnrichableHandler and @EnrichableCode via reflection
+│   ├── EnrichableCode.java         ← Annotation for custom exception classes (code + level)
+│   └── EnrichableHandler.java      ← Annotation for service classes (context + defaultLevel)
+│
+├── config/
+│   ├── EnrichConfiguration.java    ← Controls what shows in output (timestamp, level, metadata...)
+│   └── ErrorLevel.java             ← Enum — INFO / WARNING / ERROR / CRITICAL
+│
+├── formatter/
+│   ├── EnrichFormatter.java        ← Interface for formatting exception output
+│   └── DefaultEnrichFormatter.java ← Default implementation of EnrichFormatter
+│
+├── logging/
+│   └── FileEnrichLogger.java       ← Thread-safe file logger => writes to enrichable.log
+│
+├── model/
+│   └── EnrichInformation.java      ← Model for a single error entry (context, code, message, level)
+│
+└── validation/
+    └── EnrichValidator.java        ← Validates inputs — rejects null/blank values before they sneak in
+```
 ---
 
 ## Features
