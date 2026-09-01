@@ -26,13 +26,13 @@ public class DefaultEnrichFormatter implements EnrichFormatter {
         for (int i = 0; i < list.size(); i++) {
             EnrichInformation info = list.get(i);
 
-            if (config.getShowErrorCount())
+            if (config.isShowErrorCount())
                 sb.append("[ERROR-").append(i + 1).append("]");
 
-            if (config.getShowTimestamp())
+            if (config.isShowTimestamp())
                 sb.append("[").append(info.getDateTime()).append("]");
 
-            if (config.getShowErrorLevel())
+            if (config.isShowErrorLevel())
                 sb.append("[").append(info.getErrorLevel()).append("]");
 
             sb.append("[")
@@ -43,7 +43,7 @@ public class DefaultEnrichFormatter implements EnrichFormatter {
                     .append(info.getMessage())
                     .append("\n");
 
-            if (config.getShowMetadata())
+            if (config.isShowMetadata())
                 for (Map.Entry<String, String> e : info.getMetadata().entrySet())
                     sb.append("[")
                             .append(e.getKey())

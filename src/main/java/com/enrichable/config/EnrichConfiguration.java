@@ -14,28 +14,28 @@ public class EnrichConfiguration {
         this.showTimestamp = showTimestamp;
         return this;
     }
-    public boolean getShowTimestamp() {
+    public boolean isShowTimestamp() {
         return this.showTimestamp;
     }
     public EnrichConfiguration setShowErrorLevel(boolean showErrorLevel) {
         this.showErrorLevel = showErrorLevel;
         return this;
     }
-    public boolean getShowErrorLevel() {
+    public boolean isShowErrorLevel() {
         return this.showErrorLevel;
     }
     public EnrichConfiguration setShowErrorCount(boolean showErrorCount) {
         this.showErrorCount = showErrorCount;
         return this;
     }
-    public boolean getShowErrorCount() {
+    public boolean isShowErrorCount() {
         return this.showErrorCount;
     }
     public EnrichConfiguration setShowMetadata(boolean showMetadata) {
         this.showMetadata = showMetadata;
         return this;
     }
-    public boolean getShowMetadata() {
+    public boolean isShowMetadata() {
         return this.showMetadata;
     }
 }
