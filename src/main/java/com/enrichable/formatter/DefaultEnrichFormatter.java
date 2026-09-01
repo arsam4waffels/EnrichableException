@@ -1,5 +1,6 @@
 package com.enrichable.formatter;
 
+import java.time.format.DateTimeFormatter;
 import com.enrichable.config.EnrichConfiguration;
 import com.enrichable.model.EnrichInformation;
 import java.util.List;
@@ -7,7 +8,8 @@ import java.util.Map;
 
 public class DefaultEnrichFormatter implements EnrichFormatter {
     private final EnrichConfiguration config;
-
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public DefaultEnrichFormatter(EnrichConfiguration config) {
         this.config = config;
     }
@@ -30,7 +32,9 @@ public class DefaultEnrichFormatter implements EnrichFormatter {
                 sb.append("[ERROR-").append(i + 1).append("]");
 
             if (config.isShowTimestamp())
-                sb.append("[").append(info.getDateTime()).append("]");
+                sb.append("[")
+                        .append(info.getDateTime().format(DATE_TIME_FORMATTER))
+                        .append("]");
 
             if (config.isShowErrorLevel())
                 sb.append("[").append(info.getErrorLevel()).append("]");
