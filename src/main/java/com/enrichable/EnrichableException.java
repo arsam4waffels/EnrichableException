@@ -1,6 +1,7 @@
 package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
+import com.enrichable.config.LogConfig;
 import com.enrichable.config.ConsoleConfig;
 import com.enrichable.formatter.DefaultEnrichFormatter;
 import com.enrichable.logging.FileEnrichLogger;
@@ -14,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EnrichableException extends RuntimeException {
     private volatile ConsoleConfig consoleConfig = new ConsoleConfig();
-    private volatile ErrorLevel logFilter;
+    private volatile LogConfig logConfig = new LogConfig();
     private final String thrownAt = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     private final List<EnrichInformation> informationList = new CopyOnWriteArrayList<>();
@@ -27,7 +28,7 @@ public class EnrichableException extends RuntimeException {
         addInformation(context, code, message, level);
     }
     public EnrichableException setConsoleConfig(ConsoleConfig consoleConfig) {
-        EnrichValidator.requireNonNull(consoleConfig, "Exception configuration");
+        EnrichValidator.requireNonNull(consoleConfig, "Console configuration");
         this.consoleConfig = consoleConfig;
         return this;
     }
@@ -52,14 +53,17 @@ public class EnrichableException extends RuntimeException {
         );
         return this;
     }
+    @Deprecated
     public EnrichableException onlyLog(ErrorLevel level) {
         EnrichValidator.requireNonNull(level);
-        this.logFilter = level;
+        this.logConfig.onlyLevel(level);
         return this;
     }
     public void writeLog() {
-        List<EnrichInformation> loggable = getLoggable();
-        FileEnrichLogger.getInstance().write(loggable, thrownAt);
+        FileEnrichLogger.getInstance().write(
+                informationList,
+                thrownAt,
+                logConfig);
     }
     @Override
     public synchronized String toString() {
@@ -67,11 +71,5 @@ public class EnrichableException extends RuntimeException {
     }
     public List<EnrichInformation> getInformationList() {
         return informationList;
-    }
-    private synchronized List<EnrichInformation> getLoggable() {
-        if (logFilter == null) return informationList;
-        return informationList.stream()
-                .filter(i -> i.getErrorLevel() == logFilter)
-                .toList();
     }
 }
