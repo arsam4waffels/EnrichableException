@@ -1,7 +1,8 @@
 package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
-import com.enrichable.config.EnrichConfiguration;
+import com.enrichable.config.LogConfig;
+import com.enrichable.config.ConsoleConfig;
 import com.enrichable.formatter.DefaultEnrichFormatter;
 import com.enrichable.logging.FileEnrichLogger;
 import com.enrichable.model.EnrichInformation;
@@ -13,8 +14,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EnrichableException extends RuntimeException {
-    private volatile EnrichConfiguration config = new EnrichConfiguration();
-    private volatile ErrorLevel logFilter;
+    private volatile ConsoleConfig consoleConfig = new ConsoleConfig();
+    private volatile LogConfig logConfig = new LogConfig();
     private final String thrownAt = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     private final List<EnrichInformation> informationList = new CopyOnWriteArrayList<>();
@@ -26,9 +27,14 @@ public class EnrichableException extends RuntimeException {
         super(message, cause);
         addInformation(context, code, message, level);
     }
-    public EnrichableException setConfig(EnrichConfiguration config) {
-        EnrichValidator.requireNonNull(config, "Exception configuration");
-        this.config = config;
+    public EnrichableException setConsoleConfig(ConsoleConfig consoleConfig) {
+        EnrichValidator.requireNonNull(consoleConfig, "Console configuration");
+        this.consoleConfig = consoleConfig;
+        return this;
+    }
+    public EnrichableException setLogConfig(LogConfig logConfig) {
+        EnrichValidator.requireNonNull(logConfig, "Log configuration");
+        this.logConfig = logConfig;
         return this;
     }
     public synchronized EnrichableException addInformation(String context,
@@ -52,26 +58,23 @@ public class EnrichableException extends RuntimeException {
         );
         return this;
     }
+    @Deprecated
     public EnrichableException onlyLog(ErrorLevel level) {
         EnrichValidator.requireNonNull(level);
-        this.logFilter = level;
+        this.logConfig.onlyLevel(level);
         return this;
     }
     public void writeLog() {
-        List<EnrichInformation> loggable = getLoggable();
-        FileEnrichLogger.getInstance().write(loggable, thrownAt);
+        FileEnrichLogger.getInstance().write(
+                informationList,
+                thrownAt,
+                logConfig);
     }
     @Override
     public synchronized String toString() {
-        return new DefaultEnrichFormatter(config).format(informationList);
+        return new DefaultEnrichFormatter(consoleConfig).format(informationList);
     }
     public List<EnrichInformation> getInformationList() {
         return informationList;
-    }
-    private synchronized List<EnrichInformation> getLoggable() {
-        if (logFilter == null) return informationList;
-        return informationList.stream()
-                .filter(i -> i.getErrorLevel() == logFilter)
-                .toList();
     }
 }

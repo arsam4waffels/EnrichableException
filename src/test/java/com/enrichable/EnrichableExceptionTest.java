@@ -1,7 +1,8 @@
 package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
-import com.enrichable.config.EnrichConfiguration;
+import com.enrichable.config.ConsoleConfig;
+import com.enrichable.config.LogConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,9 +58,9 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowErrorLevel(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showErrorLevel(true)
         );
         String result = exception.toString();
         // CRITICAL should be visible when error level display is enabled.
@@ -79,9 +80,9 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowErrorLevel(false)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showErrorLevel(false)
         );
         String result = exception.toString();
         // CRITICAL should not appear when error level display is disabled.
@@ -146,9 +147,9 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("","user-6969");
 
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         String result = exception.toString();
         // Blank metadata keys are represented as -> [BLANK=value].
@@ -171,9 +172,9 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("userID","");
 
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         String result = exception.toString();
         // Blank metadata values are represented as [key=BLANK].
@@ -197,9 +198,9 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("userID","1234");
 
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(false)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(false)
         );
         String result = exception.toString();
         assertFalse(result.contains("[userID=1234]"));
@@ -223,9 +224,9 @@ class EnrichableExceptionTest {
                         "Authentication failed",
                         ErrorLevel.WARNING
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowErrorCount(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showErrorCount(true)
         );
         String result = exception.toString();
         // Both errors should have their own sequential number.
@@ -251,9 +252,9 @@ class EnrichableExceptionTest {
                         "Authentication failed",
                         ErrorLevel.WARNING
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowErrorCount(false)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showErrorCount(false)
         );
         String result = exception.toString();
         // Error numbers should not appear when counting is disabled.
@@ -326,9 +327,9 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowTimestamp(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showTimestamp(true)
         );
         String result = exception.toString();
         /*
@@ -373,9 +374,9 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowTimestamp(false)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showTimestamp(false)
         );
         String result = exception.toString();
         assertFalse(result.matches("(?s).*\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\].*"));
@@ -422,9 +423,9 @@ class EnrichableExceptionTest {
                                 ErrorLevel.WARNING
                         )
                         .addMetadata("userId", "2048");
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         String result = exception.toString();
         assertTrue(result.contains("[userId=1042]"));
@@ -447,9 +448,9 @@ class EnrichableExceptionTest {
                                 "Authentication failed",
                                 ErrorLevel.WARNING
                         );
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         String result = exception.toString();
         int databaseStart = result.indexOf("[DATABASE:DB-001] Database failed");
@@ -471,9 +472,9 @@ class EnrichableExceptionTest {
                         .addMetadata("userId", "1042")
                         .addMetadata("requestId", "req-abc-999")
                         .addMetadata("retryCount", "3");
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         String result = exception.toString();
         assertTrue(result.contains("[userId=1042]"));
@@ -493,12 +494,12 @@ class EnrichableExceptionTest {
                         .addMetadata("userId", "1042")
                         .addMetadata("requestId", "req-abc-999")
                         .addMetadata("retryCount", "3");
-        exception.setConfig(
-                new EnrichConfiguration()
-                        .setShowMetadata(true)
+        exception.setConsoleConfig(
+                new ConsoleConfig()
+                        .showMetadata(true)
         );
         assertThrows(IllegalArgumentException.class,
-                () -> exception.setConfig(null));
+                () -> exception.setConsoleConfig(null));
     }
     @BeforeEach
     void cleanLogFile() throws IOException {
@@ -789,5 +790,271 @@ class EnrichableExceptionTest {
         latch.countDown();
         done.await();
         executor.shutdown();
+    }
+    @Test
+    void shouldLogOnlyConfiguredLevel() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null)
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING)
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.ERROR);
+        exception.setLogConfig(
+                new LogConfig()
+                        .onlyLevel(ErrorLevel.ERROR));
+        exception.writeLog();
+        String result = Files.readString(Path.of("enrichable.log"));
+        assertTrue(result.contains("Authentication failed"));
+        assertFalse(result.contains("Database failed"));
+        assertFalse(result.contains("Cache failed"));
+    }
+    @Test
+    void shouldLogFromMinimumConfiguredLevel() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null)
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.ERROR)
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING);
+        exception.setLogConfig(
+                new LogConfig()
+                        .minimumLevel(ErrorLevel.ERROR));
+        exception.writeLog();
+        String result = Files.readString(Path.of("enrichable.log"));
+        assertTrue(result.contains("Database failed"));
+        assertTrue(result.contains("Authentication failed"));
+        assertFalse(result.contains("Cache failed"));
+    }
+    @Test
+    void shouldHideTimestampWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showTimestamp(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("Thrown At"));
+        assertFalse(result.contains("└─ Time :"));
+    }
+    @Test
+    void shouldHideErrorLevelWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showErrorLevel(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("[ERROR]"));
+    }
+    @Test
+    void shouldHideMetadataWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                )
+                        .addMetadata("userId", "12345");
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showMetadata(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("userId"));
+        assertFalse(result.contains("12345"));
+    }
+    @Test
+    void shouldWriteLogToConfiguredFile() throws IOException {
+        Path customLogFile = Path.of("custom-enrichable.log");
+
+        try {
+            EnrichableException exception =
+                    new EnrichableException(
+                            "DATABASE",
+                            "DB-001",
+                            "Database failed",
+                            ErrorLevel.ERROR,
+                            null
+                    );
+
+            exception.setLogConfig(
+                    new LogConfig()
+                            .filePath(customLogFile.toString())
+            );
+
+            exception.writeLog();
+
+            assertTrue(Files.exists(customLogFile));
+
+            String result = Files.readString(customLogFile);
+
+            assertTrue(result.contains("Database failed"));
+        } finally {
+            Files.deleteIfExists(customLogFile);
+        }
+    }
+    @Test
+    void shouldClearPreviousLogWhenClearBeforeWriteIsEnabled()
+            throws IOException {
+
+        Path customLogFile = Path.of("clear-test.log");
+
+        try {
+            Files.writeString(
+                    customLogFile,
+                    "OLD LOG CONTENT"
+            );
+
+            EnrichableException exception =
+                    new EnrichableException(
+                            "DATABASE",
+                            "DB-001",
+                            "New database failure",
+                            ErrorLevel.ERROR,
+                            null
+                    );
+
+            exception.setLogConfig(
+                    new LogConfig()
+                            .filePath(customLogFile.toString())
+                            .clearBeforeWrite(true)
+            );
+
+            exception.writeLog();
+
+            String result = Files.readString(customLogFile);
+
+            assertTrue(result.contains("New database failure"));
+            assertFalse(result.contains("OLD LOG CONTENT"));
+        } finally {
+            Files.deleteIfExists(customLogFile);
+        }
+    }
+    @Test
+    void shouldShowTimestampByDefaultInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(new LogConfig());
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertTrue(result.contains("Thrown At"));
+    }
+    @Test
+    void shouldShowErrorLevelByDefaultInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(new LogConfig());
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertTrue(result.contains("[ERROR]"));
+    }
+    @Test
+    void shouldRejectNullOnlyLevel() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectNullMinimumLevel() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectNullLogFilePath() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectBlankLogFilePath() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
     }
 }

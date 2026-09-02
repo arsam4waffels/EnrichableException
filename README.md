@@ -14,7 +14,7 @@ It's still a work in progress, but it's slowly becoming something useful.
 
 ## Project Structure
 
-```
+```text
 src/main/java/com/enrichable/
 │   EnrichableException.java        ← Core exception — carries errors, metadata, config and cause
 │   Main.java                       ← Entry point / usage examples
@@ -25,22 +25,24 @@ src/main/java/com/enrichable/
 │   └── EnrichableHandler.java      ← Annotation for service classes (context + defaultLevel)
 │
 ├── config/
-│   ├── EnrichConfiguration.java    ← Controls what shows in output (timestamp, level, metadata...)
-│   └── ErrorLevel.java             ← Enum — INFO / WARNING / ERROR / CRITICAL
+│   ├── ConsoleConfig.java          ← Controls console output formatting
+│   ├── ErrorLevel.java             ← Enum — INFO / WARNING / ERROR / CRITICAL
+│   └── LogConfig.java              ← Controls file logging behavior and formatting
 │
 ├── formatter/
 │   ├── EnrichFormatter.java        ← Interface for formatting exception output
 │   └── DefaultEnrichFormatter.java ← Default implementation of EnrichFormatter
 │
 ├── logging/
-│   └── FileEnrichLogger.java       ← Thread-safe file logger => writes to enrichable.log
+│   └── FileEnrichLogger.java       ← Thread-safe file logger
 │
 ├── model/
-│   └── EnrichInformation.java      ← Model for a single error entry (context, code, message, level)
+│   └── EnrichInformation.java      ← Model for a single error entry
 │
 └── validation/
-    └── EnrichValidator.java        ← Validates inputs — rejects null/blank values before they sneak in
+    └── EnrichValidator.java        ← Validates and normalizes input values
 ```
+
 ---
 
 ## Features
@@ -48,15 +50,19 @@ src/main/java/com/enrichable/
 * Multiple error information entries
 * Error levels
 * Custom metadata
-* Configurable output
+* Configurable console output
+* Configurable file logging
 * Optional timestamps
 * Optional error count
+* Optional metadata output
 * Exception cause preservation
 * Thread-safe file logging
 * Error-level log filtering
+* Custom log file paths
+* Optional log file clearing
 * Input validation
 * JUnit 5 tests
-* Annotation for custom exception classes
+* Annotation-based exception creation
 * Thread-safe exception building
 
 ---
@@ -113,6 +119,8 @@ error level
 cause
 ```
 
+By default, the exception output includes the available timestamp, error level, error count, and metadata information.
+
 ---
 
 ## Adding Information
@@ -132,11 +140,13 @@ exception.addInformation(
 
 This can be useful when several related things go wrong during the same operation.
 
+Each `EnrichInformation` entry keeps its own context, code, message, level, timestamp, and metadata.
+
 ---
 
 ## Metadata
 
-You can also attach extra key-value information:
+You can attach extra key-value information to the latest error entry:
 
 ```java
 exception
@@ -145,42 +155,246 @@ exception
         .addMetadata("retryCount", "3");
 ```
 
-Whether metadata appears in the output is controlled by the configuration:
+Metadata belongs to the specific error information it was added to.
+
+For example, if an exception contains multiple error entries, metadata added after one entry does not leak into the others.
+
+Whether metadata appears in the console output is controlled by `ConsoleConfig`.
 
 ```java
-exception.setConfig(
-        new ExceptionConfiguration()
-                .setShowMetadata(true)
+exception.setConsoleConfig(
+        new ConsoleConfig()
+                .showMetadata(true)
 );
 ```
 
 ---
 
-## Configuration
+## Console Configuration
 
-`ExceptionConfiguration` controls what information should be included in the formatted exception output.
+`ConsoleConfig` controls what information is included in the formatted console representation of the exception.
 
 ```java
-ExceptionConfiguration configuration =
-        new ExceptionConfiguration()
-                .setShowTimestamp(true)
-                .setShowErrorLevel(true)
-                .setShowErrorCount(true)
-                .setShowMetadata(true);
+ConsoleConfig configuration =
+        new ConsoleConfig()
+                .showTimestamp(true)
+                .showErrorLevel(true)
+                .showErrorCount(true)
+                .showMetadata(true);
 
-exception.setConfig(configuration);
+exception.setConsoleConfig(configuration);
 ```
 
 Currently available options:
 
-| Option           | What it does               |
-| ---------------- | -------------------------- |
-| `showTimestamp`  | Shows the timestamp        |
-| `showErrorLevel` | Shows the error level      |
-| `showErrorCount` | Shows the number of errors |
-| `showMetadata`   | Shows metadata             |
+| Option           | What it does                           | Default |
+| ---------------- | -------------------------------------- | ------- |
+| `showTimestamp`  | Shows timestamps for error information | `true`  |
+| `showErrorLevel` | Shows the error level                  | `true`  |
+| `showErrorCount` | Shows the total number of errors       | `true`  |
+| `showMetadata`   | Shows metadata attached to errors      | `true`  |
 
-Everything is disabled by default.
+The console output is intentionally detailed by default.
+
+---
+
+## Logging
+
+Sometimes printing an exception to the console isn't enough.
+
+`EnrichableException` can write a formatted exception report to a file using:
+
+```java
+exception.writeLog();
+```
+
+By default, the log file is:
+
+```text
+enrichable.log
+```
+
+The generated report keeps each error and its metadata together, so things don't turn into a wall of random error messages.
+
+Example:
+
+```text
+════════════════════════════════════════════════════
+  ENRICHABLE EXCEPTION REPORT
+  Total Errors : 2
+  Thrown At    : 2026-08-27 11:58:37
+════════════════════════════════════════════════════
+
+  [ERROR-1] [CRITICAL] [DATABASE:DB-001]
+  Failed to execute query: table 'users' not found
+    └─ Time : 2026-08-27T11:58:37
+    └─ retryCount : 3
+    └─ query : SELECT * FROM users
+    └─ userId : 1042
+
+  [ERROR-2] [WARNING] [DATABASE-SIZE:DB-002]
+  Failed to execute query: table 'users-info' not found
+    └─ Time : 2026-08-27T11:58:37
+```
+
+Each call to `writeLog()` writes another report to the configured log file.
+
+File logging is thread-safe, so concurrent exceptions can safely write to the shared log file without interleaving their reports.
+
+---
+
+## Log Configuration
+
+File logging can be configured independently from console output using `LogConfig`.
+
+```java
+LogConfig logConfig =
+        new LogConfig()
+                .showTimestamp(true)
+                .showErrorLevel(true)
+                .showMetadata(true)
+                .filePath("application.log");
+
+exception.setLogConfig(logConfig);
+exception.writeLog();
+```
+
+`LogConfig` currently provides the following options:
+
+| Option             | What it does                            | Default          |
+| ------------------ | --------------------------------------- | ---------------- |
+| `showTimestamp`    | Shows timestamps in the log report      | `true`           |
+| `showErrorLevel`   | Shows error levels                      | `true`           |
+| `showMetadata`     | Shows metadata                          | `true`           |
+| `filePath`         | Changes the log file path               | `enrichable.log` |
+| `clearBeforeWrite` | Clears the existing file before writing | `false`          |
+
+Console and logging configuration are independent.
+
+For example:
+
+```java
+exception.setConsoleConfig(
+        new ConsoleConfig()
+                .showMetadata(false)
+);
+
+exception.setLogConfig(
+        new LogConfig()
+                .showMetadata(true)
+);
+```
+
+This hides metadata from console output while keeping it in the log file.
+
+---
+
+## Log-Level Filtering
+
+`LogConfig` can filter which errors are written to the log file.
+
+### `onlyLevel()`
+
+Use `onlyLevel()` when you want to log only one specific error level:
+
+```java
+exception.setLogConfig(
+        new LogConfig()
+                .onlyLevel(ErrorLevel.CRITICAL)
+);
+
+exception.writeLog();
+```
+
+For example, with:
+
+```java
+.onlyLevel(ErrorLevel.ERROR)
+```
+
+only `ERROR` entries are written to the log.
+
+---
+
+### `minimumLevel()`
+
+Use `minimumLevel()` when you want to log a level and everything more severe than it.
+
+```java
+exception.setLogConfig(
+        new LogConfig()
+                .minimumLevel(ErrorLevel.ERROR)
+);
+
+exception.writeLog();
+```
+
+With the current error-level ordering:
+
+```text
+INFO
+WARNING
+ERROR
+CRITICAL
+```
+
+the configuration:
+
+```java
+.minimumLevel(ErrorLevel.ERROR)
+```
+
+logs:
+
+```text
+ERROR      ✓
+CRITICAL   ✓
+WARNING    ✗
+INFO       ✗
+```
+
+`onlyLevel()` and `minimumLevel()` are mutually exclusive. Setting one clears the other.
+
+---
+
+## Custom Log File
+
+You can change the destination of the log file:
+
+```java
+exception.setLogConfig(
+        new LogConfig()
+                .filePath("application.log")
+);
+
+exception.writeLog();
+```
+
+This allows different applications or environments to use their own log file names.
+
+---
+
+## Clearing Previous Logs
+
+By default, writing to a log file appends the new report:
+
+```java
+new LogConfig()
+        .clearBeforeWrite(false);
+```
+
+If you want the existing file to be cleared before writing:
+
+```java
+exception.setLogConfig(
+        new LogConfig()
+                .clearBeforeWrite(true)
+);
+
+exception.writeLog();
+```
+
+This is useful when a fresh report is preferred instead of an accumulated log file.
 
 ---
 
@@ -235,54 +449,6 @@ exception.getCause();
 
 ---
 
-## Logging
-
-Sometimes printing an exception to the console isn't enough.
-
-`EnrichableException` can write a formatted exception report to `enrichable.log` using:
-
-```java
-exception.writeLog();
-```
-
-The generated report keeps each error and its metadata together, so things don't turn into a wall of random error messages.
-
-Example:
-
-```text
-════════════════════════════════════════════════════
-  ENRICHABLE EXCEPTION REPORT
-  Total Errors : 2
-  Thrown At    : 2026-08-27 11:58:37
-════════════════════════════════════════════════════
-
-  [ERROR-1] [CRITICAL] [DATABASE:DB-001]
-  Failed to execute query: table 'users' not found
-    └─ Time : 2026-08-27 11:58:37
-    └─ retryCount : 3
-    └─ query : SELECT * FROM users
-    └─ userId : 1042
-
-  [ERROR-2] [WARNING] [DATABASE-SIZE:DB-002]
-  Failed to execute query: table 'users-info' not found
-    └─ Time : 2026-08-27 11:58:37
-```
-
-Each call to `writeLog()` appends a new report to `enrichable.log`.
-
-File logging is thread-safe, so concurrent exceptions can safely write to the shared `enrichable.log` file without interleaving their reports.
-
-You can use `onlyLog()` to log only errors with a specific level. The filter only affects file logging; all exception information is still preserved.
-
-```text
-exception
-        .onlyLog(ErrorLevel.CRITICAL)
-        .writeLog();
-```
-Metadata is attached to the specific exception information it belongs to, rather than being shared between all errors.
-
-
----
 ## Annotations
 
 Instead of repeating context, codes, and levels every time, you can define them once on the class itself.
@@ -290,8 +456,12 @@ Instead of repeating context, codes, and levels every time, you can define them 
 `@EnrichableHandler` goes on service classes:
 
 ```java
-@EnrichableHandler(context = "Database", defaultLevel = ErrorLevel.CRITICAL)
+@EnrichableHandler(
+        context = "Database",
+        defaultLevel = ErrorLevel.CRITICAL
+)
 public class DatabaseService {
+
     public void connect() {
         throw AnnotationProcessor.processHandler(
                 DatabaseService.class,
@@ -305,8 +475,14 @@ public class DatabaseService {
 `@EnrichableCode` goes on custom exception classes:
 
 ```java
-@EnrichableCode(code = "DB-001", level = ErrorLevel.CRITICAL)
-public class DatabaseConnectionException extends EnrichableException { ... }
+@EnrichableCode(
+        code = "DB-001",
+        level = ErrorLevel.CRITICAL
+)
+public class DatabaseConnectionException
+        extends EnrichableException {
+    // ...
+}
 
 throw AnnotationProcessor.processCode(
         DatabaseConnectionException.class,
@@ -321,14 +497,14 @@ The annotated values are picked up automatically.
 
 ## Validation
 
-The library performs some basic validation so invalid information doesn't quietly make its way into an exception.
+The library performs basic validation so invalid information doesn't quietly make its way into an exception.
 
 Required text values cannot be `null` or blank.
 
 Metadata also has a few rules:
 
-* `null` keys & values are rejected.
-* Blank keys & values become `BLANK`.
+* `null` keys and values are rejected.
+* Blank keys and values are normalized to `BLANK`.
 
 For example:
 
@@ -354,6 +530,8 @@ becomes:
 [userId=BLANK]
 ```
 
+Configuration values are also validated. For example, null error levels and invalid log file paths are rejected.
+
 ---
 
 ## Testing
@@ -366,17 +544,20 @@ Run all tests with:
 mvn test
 ```
 
-The tests currently cover things like:
+The current test suite covers:
 
 * Adding information
 * Input validation
 * Metadata
-* Configuration
+* Console configuration
+* Log configuration
 * Exception causes
 * Multiple error information
 * Output behavior
 * File logging
 * Log-level filtering
+* Custom log file paths
+* Clearing previous logs
 * Thread-safe file logging
 * Concurrent exception building
 * Concurrent metadata writing
@@ -406,12 +587,21 @@ databaseError
         .addMetadata("query", "SELECT * FROM users")
         .addMetadata("retryCount", "3");
 
-databaseError.setConfig(
-        new ExceptionConfiguration()
-                .setShowTimestamp(true)
-                .setShowErrorLevel(true)
-                .setShowErrorCount(true)
-                .setShowMetadata(true)
+databaseError.setConsoleConfig(
+        new ConsoleConfig()
+                .showTimestamp(true)
+                .showErrorLevel(true)
+                .showErrorCount(true)
+                .showMetadata(true)
+);
+
+databaseError.setLogConfig(
+        new LogConfig()
+                .minimumLevel(ErrorLevel.ERROR)
+                .showTimestamp(true)
+                .showErrorLevel(true)
+                .showMetadata(true)
+                .filePath("enrichable.log")
 );
 
 System.out.println(databaseError);
@@ -420,6 +610,36 @@ databaseError.writeLog();
 ```
 
 ---
+
+## Backward Compatibility
+
+Some older methods are still present for compatibility with earlier versions of the library.
+
+For example:
+
+```java
+exception
+        .onlyLog(ErrorLevel.CRITICAL)
+        .writeLog();
+```
+
+is still supported, but `onlyLog()` is deprecated.
+
+The recommended API is now:
+
+```java
+exception.setLogConfig(
+        new LogConfig()
+                .onlyLevel(ErrorLevel.CRITICAL)
+);
+
+exception.writeLog();
+```
+
+Similarly, the older metadata API remains available while the library evolves.
+
+---
+
 ## Why EnrichableException?
 
 Java already provides `Throwable.addSuppressed()` for attaching additional exceptions to a throwable. That's useful, but it solves a different problem.
@@ -453,6 +673,7 @@ It's more like:
 > `EnrichableException` tells you what happened, where, why, how severe it was, and gives you extra context to investigate it.
 
 ---
+
 ## Project Status
 
 This project is actively evolving as I continue exploring better ways to design and manage exceptions in Java.
