@@ -14,9 +14,9 @@ public class FileEnrichLogger {
     private static final FileEnrichLogger INSTANCE = new FileEnrichLogger();
     private static final String LOG_FILE = "enrichable.log";
     private FileEnrichLogger() {}
-    public void write(List<EnrichInformation> list, String thrownAt) {
+    public void write(List<EnrichInformation> informationList, String thrownAt) {
         synchronized (LOG_LOCK) {
-            String report = buildReport(list, thrownAt);
+            String report = buildReport(informationList, thrownAt);
             writeToFile(report);
         }
     }
@@ -24,15 +24,15 @@ public class FileEnrichLogger {
         return INSTANCE;
     }
     private String buildReport(List<EnrichInformation> list, String thrownAt) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("════════════════════════════════════════════════════\n");
-        sb.append("  ENRICHABLE EXCEPTION REPORT\n");
-        sb.append("  Total Errors : ").append(list.size()).append("\n");
-        sb.append("  Thrown At    : ").append(thrownAt).append("\n");
-        sb.append("════════════════════════════════════════════════════\n");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("════════════════════════════════════════════════════\n");
+        stringBuilder.append("  ENRICHABLE EXCEPTION REPORT\n");
+        stringBuilder.append("  Total Errors : ").append(list.size()).append("\n");
+        stringBuilder.append("  Thrown At    : ").append(thrownAt).append("\n");
+        stringBuilder.append("════════════════════════════════════════════════════\n");
         for (int i = 0; i < list.size(); i++) {
             EnrichInformation info = list.get(i);
-            sb.append("\n  [ERROR-")
+            stringBuilder.append("\n  [ERROR-")
                     .append(i + 1)
                     .append("] [")
                     .append(info.getErrorLevel())
@@ -41,20 +41,20 @@ public class FileEnrichLogger {
                     .append(":")
                     .append(info.getCode())
                     .append("]\n");
-            sb.append("  ")
+            stringBuilder.append("  ")
                     .append(info.getMessage())
                     .append("\n");
-            sb.append("    └─ Time : ")
+            stringBuilder.append("    └─ Time : ")
                     .append(info.getDateTime())
                     .append("\n");
-            for (Map.Entry<String, String> e : info.getMetadata().entrySet())
-                sb.append("    └─ ")
-                        .append(e.getKey())
+            for (Map.Entry<String, String> stringEntry : info.getMetadata().entrySet())
+                stringBuilder.append("    └─ ")
+                        .append(stringEntry.getKey())
                         .append(" : ")
-                        .append(e.getValue())
+                        .append(stringEntry.getValue())
                         .append("\n");
         }
-        return sb.toString();
+        return stringBuilder.toString();
     }
     private void writeToFile(String content) {
         try (var writer = Files.newBufferedWriter(
