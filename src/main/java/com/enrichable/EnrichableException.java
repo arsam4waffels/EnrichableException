@@ -12,10 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/*
- * Regular exceptions: "I failed."
- * EnrichableException: "Allow me to explain exactly how."
- */
 public class EnrichableException extends RuntimeException {
     private volatile EnrichConfiguration config = new EnrichConfiguration();
     private volatile ErrorLevel logFilter;
