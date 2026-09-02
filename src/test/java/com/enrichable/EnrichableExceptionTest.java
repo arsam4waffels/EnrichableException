@@ -59,7 +59,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowErrorLevel(true)
+                        .showErrorLevel(true)
         );
         String result = exception.toString();
         // CRITICAL should be visible when error level display is enabled.
@@ -81,7 +81,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowErrorLevel(false)
+                        .showErrorLevel(false)
         );
         String result = exception.toString();
         // CRITICAL should not appear when error level display is disabled.
@@ -148,7 +148,7 @@ class EnrichableExceptionTest {
 
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         String result = exception.toString();
         // Blank metadata keys are represented as -> [BLANK=value].
@@ -173,7 +173,7 @@ class EnrichableExceptionTest {
 
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         String result = exception.toString();
         // Blank metadata values are represented as [key=BLANK].
@@ -199,7 +199,7 @@ class EnrichableExceptionTest {
 
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(false)
+                        .showMetadata(false)
         );
         String result = exception.toString();
         assertFalse(result.contains("[userID=1234]"));
@@ -225,7 +225,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowErrorCount(true)
+                        .showErrorCount(true)
         );
         String result = exception.toString();
         // Both errors should have their own sequential number.
@@ -253,7 +253,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowErrorCount(false)
+                        .showErrorCount(false)
         );
         String result = exception.toString();
         // Error numbers should not appear when counting is disabled.
@@ -328,7 +328,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowTimestamp(true)
+                        .showTimestamp(true)
         );
         String result = exception.toString();
         /*
@@ -375,7 +375,7 @@ class EnrichableExceptionTest {
                 );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowTimestamp(false)
+                        .showTimestamp(false)
         );
         String result = exception.toString();
         assertFalse(result.matches("(?s).*\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\].*"));
@@ -424,7 +424,7 @@ class EnrichableExceptionTest {
                         .addMetadata("userId", "2048");
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         String result = exception.toString();
         assertTrue(result.contains("[userId=1042]"));
@@ -449,7 +449,7 @@ class EnrichableExceptionTest {
                         );
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         String result = exception.toString();
         int databaseStart = result.indexOf("[DATABASE:DB-001] Database failed");
@@ -473,7 +473,7 @@ class EnrichableExceptionTest {
                         .addMetadata("retryCount", "3");
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         String result = exception.toString();
         assertTrue(result.contains("[userId=1042]"));
@@ -495,7 +495,7 @@ class EnrichableExceptionTest {
                         .addMetadata("retryCount", "3");
         exception.setConsoleConfig(
                 new ConsoleConfig()
-                        .setShowMetadata(true)
+                        .showMetadata(true)
         );
         assertThrows(IllegalArgumentException.class,
                 () -> exception.setConsoleConfig(null));

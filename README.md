@@ -25,7 +25,7 @@ src/main/java/com/enrichable/
 │   └── EnrichableHandler.java      ← Annotation for service classes (context + defaultLevel)
 │
 ├── config/
-│   ├── EnrichConfiguration.java    ← Controls what shows in output (timestamp, level, metadata...)
+│   ├── ConsoleConfig.java          ← Controls what shows in console output (timestamp, level, metadata...)
 │   └── ErrorLevel.java             ← Enum — INFO / WARNING / ERROR / CRITICAL
 │
 ├── formatter/
