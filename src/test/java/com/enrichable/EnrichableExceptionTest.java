@@ -1,7 +1,7 @@
 package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
-import com.enrichable.config.EnrichConfiguration;
+import com.enrichable.config.ConsoleConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,8 +57,8 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowErrorLevel(true)
         );
         String result = exception.toString();
@@ -79,8 +79,8 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowErrorLevel(false)
         );
         String result = exception.toString();
@@ -146,8 +146,8 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("","user-6969");
 
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -171,8 +171,8 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("userID","");
 
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -197,8 +197,8 @@ class EnrichableExceptionTest {
                         null
                 ).addMetadata("userID","1234");
 
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(false)
         );
         String result = exception.toString();
@@ -223,8 +223,8 @@ class EnrichableExceptionTest {
                         "Authentication failed",
                         ErrorLevel.WARNING
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowErrorCount(true)
         );
         String result = exception.toString();
@@ -251,8 +251,8 @@ class EnrichableExceptionTest {
                         "Authentication failed",
                         ErrorLevel.WARNING
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowErrorCount(false)
         );
         String result = exception.toString();
@@ -326,8 +326,8 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowTimestamp(true)
         );
         String result = exception.toString();
@@ -373,8 +373,8 @@ class EnrichableExceptionTest {
                         ErrorLevel.CRITICAL,
                         null
                 );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowTimestamp(false)
         );
         String result = exception.toString();
@@ -422,8 +422,8 @@ class EnrichableExceptionTest {
                                 ErrorLevel.WARNING
                         )
                         .addMetadata("userId", "2048");
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -447,8 +447,8 @@ class EnrichableExceptionTest {
                                 "Authentication failed",
                                 ErrorLevel.WARNING
                         );
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -471,8 +471,8 @@ class EnrichableExceptionTest {
                         .addMetadata("userId", "1042")
                         .addMetadata("requestId", "req-abc-999")
                         .addMetadata("retryCount", "3");
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         String result = exception.toString();
@@ -493,12 +493,12 @@ class EnrichableExceptionTest {
                         .addMetadata("userId", "1042")
                         .addMetadata("requestId", "req-abc-999")
                         .addMetadata("retryCount", "3");
-        exception.setConfig(
-                new EnrichConfiguration()
+        exception.setConsoleConfig(
+                new ConsoleConfig()
                         .setShowMetadata(true)
         );
         assertThrows(IllegalArgumentException.class,
-                () -> exception.setConfig(null));
+                () -> exception.setConsoleConfig(null));
     }
     @BeforeEach
     void cleanLogFile() throws IOException {
