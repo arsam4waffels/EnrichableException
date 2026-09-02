@@ -32,6 +32,11 @@ public class EnrichableException extends RuntimeException {
         this.consoleConfig = consoleConfig;
         return this;
     }
+    public EnrichableException setLogConfig(LogConfig logConfig) {
+        EnrichValidator.requireNonNull(logConfig, "Log configuration");
+        this.logConfig = logConfig;
+        return this;
+    }
     public synchronized EnrichableException addInformation(String context,
                                               String code,
                                               String message,

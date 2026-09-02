@@ -2,6 +2,7 @@ package com.enrichable;
 
 import com.enrichable.config.ErrorLevel;
 import com.enrichable.config.ConsoleConfig;
+import com.enrichable.config.LogConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -789,5 +790,271 @@ class EnrichableExceptionTest {
         latch.countDown();
         done.await();
         executor.shutdown();
+    }
+    @Test
+    void shouldLogOnlyConfiguredLevel() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null)
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING)
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.ERROR);
+        exception.setLogConfig(
+                new LogConfig()
+                        .onlyLevel(ErrorLevel.ERROR));
+        exception.writeLog();
+        String result = Files.readString(Path.of("enrichable.log"));
+        assertTrue(result.contains("Authentication failed"));
+        assertFalse(result.contains("Database failed"));
+        assertFalse(result.contains("Cache failed"));
+    }
+    @Test
+    void shouldLogFromMinimumConfiguredLevel() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.CRITICAL,
+                        null)
+                        .addInformation(
+                                "AUTH",
+                                "AUTH-001",
+                                "Authentication failed",
+                                ErrorLevel.ERROR)
+                        .addInformation(
+                                "CACHE",
+                                "CACHE-001",
+                                "Cache failed",
+                                ErrorLevel.WARNING);
+        exception.setLogConfig(
+                new LogConfig()
+                        .minimumLevel(ErrorLevel.ERROR));
+        exception.writeLog();
+        String result = Files.readString(Path.of("enrichable.log"));
+        assertTrue(result.contains("Database failed"));
+        assertTrue(result.contains("Authentication failed"));
+        assertFalse(result.contains("Cache failed"));
+    }
+    @Test
+    void shouldHideTimestampWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showTimestamp(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("Thrown At"));
+        assertFalse(result.contains("└─ Time :"));
+    }
+    @Test
+    void shouldHideErrorLevelWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showErrorLevel(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("[ERROR]"));
+    }
+    @Test
+    void shouldHideMetadataWhenDisabledInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                )
+                        .addMetadata("userId", "12345");
+
+        exception.setLogConfig(
+                new LogConfig()
+                        .showMetadata(false)
+        );
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertFalse(result.contains("userId"));
+        assertFalse(result.contains("12345"));
+    }
+    @Test
+    void shouldWriteLogToConfiguredFile() throws IOException {
+        Path customLogFile = Path.of("custom-enrichable.log");
+
+        try {
+            EnrichableException exception =
+                    new EnrichableException(
+                            "DATABASE",
+                            "DB-001",
+                            "Database failed",
+                            ErrorLevel.ERROR,
+                            null
+                    );
+
+            exception.setLogConfig(
+                    new LogConfig()
+                            .filePath(customLogFile.toString())
+            );
+
+            exception.writeLog();
+
+            assertTrue(Files.exists(customLogFile));
+
+            String result = Files.readString(customLogFile);
+
+            assertTrue(result.contains("Database failed"));
+        } finally {
+            Files.deleteIfExists(customLogFile);
+        }
+    }
+    @Test
+    void shouldClearPreviousLogWhenClearBeforeWriteIsEnabled()
+            throws IOException {
+
+        Path customLogFile = Path.of("clear-test.log");
+
+        try {
+            Files.writeString(
+                    customLogFile,
+                    "OLD LOG CONTENT"
+            );
+
+            EnrichableException exception =
+                    new EnrichableException(
+                            "DATABASE",
+                            "DB-001",
+                            "New database failure",
+                            ErrorLevel.ERROR,
+                            null
+                    );
+
+            exception.setLogConfig(
+                    new LogConfig()
+                            .filePath(customLogFile.toString())
+                            .clearBeforeWrite(true)
+            );
+
+            exception.writeLog();
+
+            String result = Files.readString(customLogFile);
+
+            assertTrue(result.contains("New database failure"));
+            assertFalse(result.contains("OLD LOG CONTENT"));
+        } finally {
+            Files.deleteIfExists(customLogFile);
+        }
+    }
+    @Test
+    void shouldShowTimestampByDefaultInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(new LogConfig());
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertTrue(result.contains("Thrown At"));
+    }
+    @Test
+    void shouldShowErrorLevelByDefaultInLogConfig() throws IOException {
+        EnrichableException exception =
+                new EnrichableException(
+                        "DATABASE",
+                        "DB-001",
+                        "Database failed",
+                        ErrorLevel.ERROR,
+                        null
+                );
+
+        exception.setLogConfig(new LogConfig());
+
+        exception.writeLog();
+
+        String result = Files.readString(Path.of("enrichable.log"));
+
+        assertTrue(result.contains("[ERROR]"));
+    }
+    @Test
+    void shouldRejectNullOnlyLevel() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectNullMinimumLevel() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectNullLogFilePath() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
+    }
+    @Test
+    void shouldRejectBlankLogFilePath() {
+        LogConfig config = new LogConfig();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> config.onlyLevel(null)
+        );
     }
 }
