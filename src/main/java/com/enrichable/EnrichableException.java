@@ -20,6 +20,7 @@ public class EnrichableException extends RuntimeException {
     private final String thrownAt = LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     private final List<EnrichInformation> informationList = new CopyOnWriteArrayList<>();
+    @Deprecated
     public EnrichableException(String context,
                                String code,
                                String message,
