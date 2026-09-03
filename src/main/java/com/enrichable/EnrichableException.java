@@ -83,9 +83,9 @@ public class EnrichableException extends RuntimeException {
                                               String message,
                                               ErrorLevel level) {
         EnrichValidator.requireNonBlank(context, "Exception context");
-        EnrichValidator.requireNonBlank(code, "Exception code");
         EnrichValidator.requireNonBlank(message, "Exception message");
         EnrichValidator.requireNonNull(level);
+        if (code != null) EnrichValidator.requireNonBlank(code, "Exception code");
         informationList.add(new EnrichInformation(context, code, message, level));
         return this;
     }
