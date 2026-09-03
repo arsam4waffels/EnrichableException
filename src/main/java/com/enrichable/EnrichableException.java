@@ -28,6 +28,46 @@ public class EnrichableException extends RuntimeException {
         super(message, cause);
         addInformation(context, code, message, level);
     }
+    public EnrichableException(Builder builder) {
+        super(builder.message, builder.throwable);
+        addInformation(
+                builder.context,
+                builder.code,
+                builder.message,
+                builder.errorLevel
+        );
+    }
+    public static class Builder {
+        private final String context;
+        private String code;
+        private final String message;
+        private ErrorLevel errorLevel = ErrorLevel.ERROR;
+        private Throwable throwable;
+        public Builder(String context, String message) {
+            EnrichValidator.requireNonBlank(context, "context");
+            EnrichValidator.requireNonBlank(message, "message");
+            this.context = context;
+            this.message = message;
+        }
+        public Builder code(String code) {
+            EnrichValidator.requireNonBlank(code, "code");
+            this.code = code;
+            return this;
+        }
+        public Builder level(ErrorLevel errorLevel) {
+            EnrichValidator.requireNonNull(errorLevel);
+            this.errorLevel = errorLevel;
+            return this;
+        }
+        public Builder cause(Throwable throwable) {
+            EnrichValidator.requireNonNull(throwable, "cause");
+            this.throwable = throwable;
+            return this;
+        }
+        public EnrichableException build() {
+            return new EnrichableException(this);
+        }
+    }
     public EnrichableException setConsoleConfig(ConsoleConfig consoleConfig) {
         EnrichValidator.requireNonNull(consoleConfig, "Console configuration");
         this.consoleConfig = consoleConfig;
