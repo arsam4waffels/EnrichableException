@@ -48,6 +48,7 @@ src/main/java/com/enrichable/
 ## Features
 
 * Multiple error information entries
+* Builder API for readable exception creation
 * Error levels
 * Custom metadata
 * Configurable console output
@@ -94,32 +95,94 @@ mvn test
 
 ## Quick Start
 
-Create an `EnrichableException` like this:
+Create an `EnrichableException` using the Builder API:
 
 ```java
 EnrichableException exception =
-        new EnrichableException(
+        new EnrichableException.Builder(
                 "DATABASE",
-                "DB-001",
-                "Database connection failed",
-                ErrorLevel.CRITICAL,
-                new IllegalStateException("Connection refused.")
-        );
+                "Database connection failed"
+        )
+        .code("DB-001")
+        .level(ErrorLevel.CRITICAL)
+        .cause(new IllegalStateException("Connection refused."))
+        .build();
 
 System.out.println(exception);
 ```
 
-The constructor takes:
+The Builder requires:
 
 ```text
 context
-error code
 message
-error level
+```
+
+The following options are optional:
+
+```text
+code
+level
 cause
 ```
 
+If no error level is specified, `ErrorLevel.ERROR` is used by default.
+
+For example, a minimal exception can be created with only the required fields:
+
+```java
+EnrichableException exception =
+        new EnrichableException.Builder(
+                "DATABASE",
+                "Database connection failed"
+        )
+        .build();
+```
+
 By default, the exception output includes the available timestamp, error level, error count, and metadata information.
+
+---
+
+## Builder API
+
+The Builder API provides a readable way to create `EnrichableException` instances without relying on a long constructor.
+
+```java
+EnrichableException exception =
+        new EnrichableException.Builder(
+                "DATABASE",
+                "Database connection failed"
+        )
+        .code("DB-001")
+        .level(ErrorLevel.CRITICAL)
+        .cause(new IllegalStateException("Connection refused."))
+        .build();
+```
+
+The Builder supports the following fields:
+
+| Field     | Required | Default |
+| --------- | -------- | ------- |
+| `context` | Yes      | —       |
+| `message` | Yes      | —       |
+| `code`    | No       | `null`  |
+| `level`   | No       | `ERROR` |
+| `cause`   | No       | `null`  |
+
+Each Builder method returns the same Builder instance, allowing method chaining.
+
+For example:
+
+```java
+EnrichableException exception =
+        new EnrichableException.Builder(
+                "PAYMENT",
+                "Payment processing failed"
+        )
+        .code("PAY-001")
+        .level(ErrorLevel.ERROR)
+        .build();
+```
 
 ---
 
@@ -412,33 +475,41 @@ ErrorLevel.CRITICAL
 For example:
 
 ```java
-new EnrichableException(
-        "PAYMENT",
-        "PAY-001",
-        "Payment processing failed",
-        ErrorLevel.ERROR,
-        null
-);
+EnrichableException exception =
+        new EnrichableException.Builder(
+                "PAYMENT",
+                "Payment processing failed"
+        )
+        .code("PAY-001")
+        .level(ErrorLevel.ERROR)
+        .build();
+```
+
+If no level is explicitly specified, the Builder uses:
+
+```java
+ErrorLevel.ERROR
 ```
 
 ---
 
 ## Exception Cause
 
-You can pass the original exception as the cause:
+You can pass the original exception as the cause using the Builder API:
 
 ```java
 IllegalStateException cause =
         new IllegalStateException("Connection refused.");
 
 EnrichableException exception =
-        new EnrichableException(
+        new EnrichableException.Builder(
                 "DATABASE",
-                "DB-001",
-                "Database operation failed",
-                ErrorLevel.CRITICAL,
-                cause
-        );
+                "Database operation failed"
+        )
+        .code("DB-001")
+        .level(ErrorLevel.CRITICAL)
+        .cause(cause)
+        .build();
 ```
 
 The original cause is preserved and can still be retrieved normally:
@@ -499,7 +570,9 @@ The annotated values are picked up automatically.
 
 The library performs basic validation so invalid information doesn't quietly make its way into an exception.
 
-Required text values cannot be `null` or blank.
+Required text values such as `context` and `message` cannot be `null` or blank.
+
+The optional `code`, when provided, also cannot be blank.
 
 Metadata also has a few rules:
 
@@ -546,6 +619,8 @@ mvn test
 
 The current test suite covers:
 
+* Builder API
+* Builder defaults and optional fields
 * Adding information
 * Input validation
 * Metadata
@@ -572,15 +647,16 @@ Here's a more complete example:
 
 ```java
 EnrichableException databaseError =
-        new EnrichableException(
+        new EnrichableException.Builder(
                 "DATABASE",
-                "DB-001",
-                "Failed to execute query: table 'users' not found",
-                ErrorLevel.CRITICAL,
-                new IllegalStateException(
-                        "Table 'users' does not exist."
-                )
-        );
+                "Failed to execute query: table 'users' not found"
+        )
+        .code("DB-001")
+        .level(ErrorLevel.CRITICAL)
+        .cause(new IllegalStateException(
+                "Table 'users' does not exist."
+        ))
+        .build();
 
 databaseError
         .addMetadata("userId", "1042")
@@ -637,6 +713,10 @@ exception.writeLog();
 ```
 
 Similarly, the older metadata API remains available while the library evolves.
+
+The Builder API is now the recommended way to create new `EnrichableException` instances because it provides a more readable alternative to the previous long constructor.
+
+Older construction APIs may remain available for compatibility while the library evolves.
 
 ---
 

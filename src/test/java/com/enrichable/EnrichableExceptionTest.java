@@ -3,6 +3,7 @@ package com.enrichable;
 import com.enrichable.config.ErrorLevel;
 import com.enrichable.config.ConsoleConfig;
 import com.enrichable.config.LogConfig;
+import com.enrichable.model.EnrichInformation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -1056,5 +1057,49 @@ class EnrichableExceptionTest {
                 IllegalArgumentException.class,
                 () -> config.onlyLevel(null)
         );
+    }
+    @Test
+    void shouldBuildExceptionWithRequiredFields() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "Database",
+                        "Connection failed"
+                ).build();
+
+        assertEquals("Connection failed", exception.getMessage());
+        assertNull(exception.getCause());
+
+        assertEquals(1, exception.getInformationList().size());
+
+        EnrichInformation information =
+                exception.getInformationList().get(0);
+
+        assertEquals("Database", information.getContext());
+        assertNull(information.getCode());
+        assertEquals(ErrorLevel.ERROR, information.getErrorLevel());
+    }
+    @Test
+    void shouldBuildExceptionWithAllFields() {
+        Throwable cause = new RuntimeException("Original error");
+
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "Database",
+                        "Connection failed"
+                )
+                        .code("DB-001")
+                        .level(ErrorLevel.CRITICAL)
+                        .cause(cause)
+                        .build();
+
+        assertEquals("Connection failed", exception.getMessage());
+        assertSame(cause, exception.getCause());
+
+        EnrichInformation information =
+                exception.getInformationList().get(0);
+
+        assertEquals("Database", information.getContext());
+        assertEquals("DB-001", information.getCode());
+        assertEquals(ErrorLevel.CRITICAL, information.getErrorLevel());
     }
 }
