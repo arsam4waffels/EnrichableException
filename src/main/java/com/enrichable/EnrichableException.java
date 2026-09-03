@@ -10,6 +10,7 @@ import com.enrichable.validation.EnrichValidator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -75,6 +76,6 @@ public class EnrichableException extends RuntimeException {
         return new DefaultEnrichFormatter(consoleConfig).format(informationList);
     }
     public List<EnrichInformation> getInformationList() {
-        return informationList;
+        return Collections.unmodifiableList(informationList);
     }
 }
