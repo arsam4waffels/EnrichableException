@@ -513,4 +513,225 @@ class EnrichableExceptionTest {
 
         assertSame(exception, result);
     }
+
+    // ==================== Information Validation ====================
+
+    /**
+     * Should reject a {@code null} context when adding information.
+     */
+    @Test
+    void shouldRejectNullInformationContext() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        null,
+                        "USER_404",
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject an empty context when adding information.
+     */
+    @Test
+    void shouldRejectEmptyInformationContext() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "",
+                        "USER_404",
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} context when adding information.
+     */
+    @Test
+    void shouldRejectBlankInformationContext() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "   ",
+                        "USER_404",
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code null} message when adding information.
+     */
+    @Test
+    void shouldRejectNullInformationMessage() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "USER_404",
+                        null,
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject an empty message when adding information.
+     */
+    @Test
+    void shouldRejectEmptyInformationMessage() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "USER_404",
+                        "",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} message when adding information.
+     */
+    @Test
+    void shouldRejectBlankInformationMessage() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "USER_404",
+                        "   ",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code null} error level when adding information.
+     */
+    @Test
+    void shouldRejectNullInformationLevel() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "USER_404",
+                        "User not found",
+                        null
+                )
+        );
+    }
+
+    /**
+     * Should reject an empty error code when adding information.
+     */
+    @Test
+    void shouldRejectEmptyInformationCode() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "",
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} error code when adding information.
+     */
+    @Test
+    void shouldRejectBlankInformationCode() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.addInformation(
+                        "UserService",
+                        "   ",
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
+
+    /**
+     * Should allow a {@code null} error code when adding information.
+     */
+    @Test
+    void shouldAllowNullInformationCode() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertDoesNotThrow(
+                () -> exception.addInformation(
+                        "UserService",
+                        null,
+                        "User not found",
+                        ErrorLevel.ERROR
+                )
+        );
+    }
 }
