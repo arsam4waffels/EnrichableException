@@ -734,4 +734,44 @@ class EnrichableExceptionTest {
                 )
         );
     }
+
+    // ==================== Information List ====================
+
+    /**
+     * Should return an unmodifiable information list.
+     */
+    @Test
+    void shouldReturnUnmodifiableInformationList() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> exception.getInformationList().clear()
+        );
+    }
+
+    /**
+     * Should preserve existing information when modification of the returned list is attempted.
+     */
+    @Test
+    void shouldPreserveInformationAfterModificationAttempt() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        var informationList = exception.getInformationList();
+
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> informationList.removeFirst()
+        );
+
+        assertEquals(1, exception.getInformationList().size());
+    }
 }
