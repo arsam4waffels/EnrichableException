@@ -886,4 +886,86 @@ class EnrichableExceptionTest {
                 exception.setLogConfig(config)
         );
     }
+
+    // ==================== String Representation ====================
+
+    /**
+     * Should return a formatted representation of the exception.
+     */
+    @Test
+    void shouldReturnFormattedException() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                )
+                        .code("USER_404")
+                        .level(ErrorLevel.ERROR)
+                        .build();
+
+        String result = exception.toString();
+
+        assertNotNull(result);
+        assertFalse(result.isBlank());
+    }
+
+    /**
+     * Should include the exception context in the formatted representation.
+     */
+    @Test
+    void shouldIncludeContextInFormattedException() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertTrue(exception.toString().contains("UserService"));
+    }
+
+    /**
+     * Should include the exception message in the formatted representation.
+     */
+    @Test
+    void shouldIncludeMessageInFormattedException() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertTrue(exception.toString().contains("User not found"));
+    }
+
+    /**
+     * Should include the error code in the formatted representation when specified.
+     */
+    @Test
+    void shouldIncludeCodeInFormattedException() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                )
+                        .code("USER_404")
+                        .build();
+
+        assertTrue(exception.toString().contains("USER_404"));
+    }
+
+    /**
+     * Should include the error level in the formatted representation.
+     */
+    @Test
+    void shouldIncludeErrorLevelInFormattedException() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "Something went wrong"
+                )
+                        .level(ErrorLevel.CRITICAL)
+                        .build();
+
+        assertTrue(exception.toString().contains("CRITICAL"));
+    }
 }
