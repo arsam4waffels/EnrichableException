@@ -1,6 +1,8 @@
 package com.enrichable;
 
+import com.enrichable.config.ConsoleConfig;
 import com.enrichable.config.ErrorLevel;
+import com.enrichable.config.LogConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -773,5 +775,115 @@ class EnrichableExceptionTest {
         );
 
         assertEquals(1, exception.getInformationList().size());
+    }
+
+    // ==================== Configuration ====================
+
+    /**
+     * Should accept a valid console configuration.
+     */
+    @Test
+    void shouldAcceptConsoleConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        ConsoleConfig config = new ConsoleConfig();
+
+        assertDoesNotThrow(
+                () -> exception.setConsoleConfig(config)
+        );
+    }
+
+    /**
+     * Should reject a {@code null} console configuration.
+     */
+    @Test
+    void shouldRejectNullConsoleConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.setConsoleConfig(null)
+        );
+    }
+
+    /**
+     * Should return the same exception instance after setting the console configuration.
+     */
+    @Test
+    void shouldReturnSameExceptionWhenSettingConsoleConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        ConsoleConfig config = new ConsoleConfig();
+
+        assertSame(
+                exception,
+                exception.setConsoleConfig(config)
+        );
+    }
+
+    /**
+     * Should accept a valid log configuration.
+     */
+    @Test
+    void shouldAcceptLogConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        LogConfig config = new LogConfig();
+
+        assertDoesNotThrow(
+                () -> exception.setLogConfig(config)
+        );
+    }
+
+    /**
+     * Should reject a {@code null} log configuration.
+     */
+    @Test
+    void shouldRejectNullLogConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> exception.setLogConfig(null)
+        );
+    }
+
+    /**
+     * Should return the same exception instance after setting the log configuration.
+     */
+    @Test
+    void shouldReturnSameExceptionWhenSettingLogConfiguration() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        LogConfig config = new LogConfig();
+
+        assertSame(
+                exception,
+                exception.setLogConfig(config)
+        );
     }
 }
