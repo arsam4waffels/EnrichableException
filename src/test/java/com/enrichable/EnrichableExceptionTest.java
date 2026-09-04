@@ -374,4 +374,143 @@ class EnrichableExceptionTest {
                 () -> builder.cause(null)
         );
     }
+
+    // ==================== Information ====================
+
+    /**
+     * Should contain the initial information created by the builder.
+     */
+    @Test
+    void shouldContainInitialInformation() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                )
+                        .code("USER_404")
+                        .level(ErrorLevel.WARNING)
+                        .build();
+
+        assertEquals(1, exception.getInformationList().size());
+
+        var information = exception.getInformationList().getFirst();
+
+        assertEquals("UserService", information.getContext());
+        assertEquals("USER_404", information.getCode());
+        assertEquals("User not found", information.getMessage());
+        assertEquals(ErrorLevel.WARNING, information.getErrorLevel());
+    }
+
+    /**
+     * Should add a new information entry to the exception.
+     */
+    @Test
+    void shouldAddInformation() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        exception.addInformation(
+                "DatabaseService",
+                "DB_001",
+                "Database connection failed",
+                ErrorLevel.CRITICAL
+        );
+
+        assertEquals(2, exception.getInformationList().size());
+
+        var information = exception.getInformationList().getLast();
+
+        assertEquals("DatabaseService", information.getContext());
+        assertEquals("DB_001", information.getCode());
+        assertEquals("Database connection failed", information.getMessage());
+        assertEquals(ErrorLevel.CRITICAL, information.getErrorLevel());
+    }
+
+    /**
+     * Should allow adding information without an error code.
+     */
+    @Test
+    void shouldAllowInformationWithoutCode() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        exception.addInformation(
+                "DatabaseService",
+                null,
+                "Database connection failed",
+                ErrorLevel.ERROR
+        );
+
+        var information = exception.getInformationList().getLast();
+
+        assertNull(information.getCode());
+    }
+
+    /**
+     * Should preserve the order in which information entries are added.
+     */
+    @Test
+    void shouldPreserveInformationOrder() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        exception.addInformation(
+                "DatabaseService",
+                "DB_001",
+                "Database failed",
+                ErrorLevel.ERROR
+        );
+
+        exception.addInformation(
+                "PaymentService",
+                "PAY_001",
+                "Payment failed",
+                ErrorLevel.WARNING
+        );
+
+        assertEquals(
+                "UserService",
+                exception.getInformationList().get(0).getContext()
+        );
+
+        assertEquals(
+                "DatabaseService",
+                exception.getInformationList().get(1).getContext()
+        );
+
+        assertEquals(
+                "PaymentService",
+                exception.getInformationList().get(2).getContext()
+        );
+    }
+
+    /**
+     * Should return the same exception instance after adding information.
+     */
+    @Test
+    void shouldReturnSameExceptionWhenAddingInformation() {
+        EnrichableException exception =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                ).build();
+
+        EnrichableException result = exception.addInformation(
+                "DatabaseService",
+                "DB_001",
+                "Database failed",
+                ErrorLevel.ERROR
+        );
+
+        assertSame(exception, result);
+    }
 }
