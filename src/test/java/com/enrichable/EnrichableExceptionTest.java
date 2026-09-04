@@ -181,4 +181,175 @@ class EnrichableExceptionTest {
 
         assertNotSame(first, second);
     }
+
+    // ==================== Builder Validation ====================
+
+    /**
+     * Should reject a {@code null} context
+     * */
+    @Test
+    void shouldRejectNullContext() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        null,
+                        "User not found"
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} context
+     * */
+    @Test
+    void shouldRejectBlankContext() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        "   ",
+                        "User not found"
+                )
+        );
+    }
+
+    /**
+     * Should reject an {@code empty} context
+     * */
+    @Test
+    void shouldRejectEmptyContext() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        "",
+                        "User not found"
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code null} message
+     * */
+    @Test
+    void shouldRejectNullMessage() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        "UserService",
+                        null
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} message
+     * */
+    @Test
+    void shouldRejectBlankMessage() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        "UserService",
+                        "   "
+                )
+        );
+    }
+
+    /**
+     * Should reject an {@code empty} message
+     * */
+    @Test
+    void shouldRejectEmptyMessage() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new EnrichableException.Builder(
+                        "UserService",
+                        ""
+                )
+        );
+    }
+
+    /**
+     * Should reject a {@code null} code when explicitly specified.
+     * */
+    @Test
+    void shouldRejectNullCode() {
+        EnrichableException.Builder builder =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.code(null)
+        );
+    }
+
+    /**
+     * Should reject an {@code empty} error code when explicitly specified.
+     * */
+    @Test
+    void shouldRejectEmptyCode() {
+        EnrichableException.Builder builder =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.code("")
+        );
+    }
+
+    /**
+     * Should reject a {@code blank} error code when explicitly specified.
+     * */
+    @Test
+    void shouldRejectBlankCode() {
+        EnrichableException.Builder builder =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.code("   ")
+        );
+    }
+
+    /**
+     * Should reject a {@code null} error level when explicitly specified.
+     * */
+    @Test
+    void shouldRejectNullLevel() {
+        EnrichableException.Builder builder =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.level(null)
+        );
+    }
+
+    /**
+     * Should reject a {@code null} cause when explicitly specified.
+     * */
+    @Test
+    void shouldRejectNullCause() {
+        EnrichableException.Builder builder =
+                new EnrichableException.Builder(
+                        "UserService",
+                        "User not found"
+                );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> builder.cause(null)
+        );
+    }
 }
