@@ -218,4 +218,116 @@ public class LogConfigTest {
                 () -> config.filePath("   ")
         );
     }
+
+    // ==================== Property Configuration ====================
+
+    /**
+     * Should update the timestamp display setting.
+     */
+    @Test
+    void shouldUpdateTimestampDisplay() {
+        LogConfig config = new LogConfig();
+
+        config.showTimestamp(false);
+
+        assertFalse(config.showTimestamp());
+    }
+
+    /**
+     * Should return the same configuration instance when setting timestamp display.
+     */
+    @Test
+    void shouldReturnSameInstanceWhenSettingTimestampDisplay() {
+        LogConfig config = new LogConfig();
+
+        assertSame(config, config.showTimestamp(false));
+    }
+
+    /**
+     * Should update the error level display setting.
+     */
+    @Test
+    void shouldUpdateErrorLevelDisplay() {
+        LogConfig config = new LogConfig();
+
+        config.showErrorLevel(false);
+
+        assertFalse(config.showErrorLevel());
+    }
+
+    /**
+     * Should return the same configuration instance when setting error level display.
+     */
+    @Test
+    void shouldReturnSameInstanceWhenSettingErrorLevelDisplay() {
+        LogConfig config = new LogConfig();
+
+        assertSame(config, config.showErrorLevel(false));
+    }
+
+    /**
+     * Should update the metadata display setting.
+     */
+    @Test
+    void shouldUpdateMetadataDisplay() {
+        LogConfig config = new LogConfig();
+
+        config.showMetadata(false);
+
+        assertFalse(config.showMetadata());
+    }
+
+    /**
+     * Should return the same configuration instance when setting metadata display.
+     */
+    @Test
+    void shouldReturnSameInstanceWhenSettingMetadataDisplay() {
+        LogConfig config = new LogConfig();
+
+        assertSame(config, config.showMetadata(false));
+    }
+
+    /**
+     * Should update the log file path.
+     */
+    @Test
+    void shouldUpdateFilePath() {
+        LogConfig config = new LogConfig();
+
+        config.filePath("application.log");
+
+        assertEquals("application.log", config.filePath());
+    }
+
+    /**
+     * Should return the same configuration instance when setting the log file path.
+     */
+    @Test
+    void shouldReturnSameInstanceWhenSettingFilePath() {
+        LogConfig config = new LogConfig();
+
+        assertSame(config, config.filePath("application.log"));
+    }
+
+    /**
+     * Should update the clear-before-write setting.
+     */
+    @Test
+    void shouldUpdateClearBeforeWrite() {
+        LogConfig config = new LogConfig();
+
+        config.clearBeforeWrite(true);
+
+        assertTrue(config.clearBeforeWrite());
+    }
+
+    /**
+     * Should return the same configuration instance when setting clear-before-write.
+     */
+    @Test
+    void shouldReturnSameInstanceWhenSettingClearBeforeWrite() {
+        LogConfig config = new LogConfig();
+
+        assertSame(config, config.clearBeforeWrite(true));
+    }
 }
