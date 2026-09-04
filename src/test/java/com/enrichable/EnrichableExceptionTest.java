@@ -10,7 +10,9 @@ class EnrichableExceptionTest {
     * Builder
     */
 
-    // Should build an exception with the required context and message.
+    /**
+     * Should build an exception with the required context and message.
+     * */
     @Test
     void shouldBuildExceptionWithRequiredFields() {
         EnrichableException exception =
@@ -23,7 +25,9 @@ class EnrichableExceptionTest {
         assertEquals("User not found", exception.getMessage());
     }
 
-    // Should use ERROR as the default error level when no level is specified.
+    /**
+     * Should use {@code ERROR} as the default error level when no level is specified.
+     * */
     @Test
     void shouldUseErrorAsDefaultLevel() {
         EnrichableException exception =
@@ -38,7 +42,9 @@ class EnrichableExceptionTest {
         );
     }
 
-    // Should use the specified error level.
+    /**
+     * Should use the specified error level.
+     */
     @Test
     void shouldUseSpecifiedErrorLevel() {
         EnrichableException exception =
@@ -55,7 +61,9 @@ class EnrichableExceptionTest {
         );
     }
 
-    // Should preserve the specified error code.
+    /**
+     * Should preserve the specified error code.
+     */
     @Test
     void shouldPreserveSpecifiedCode() {
         EnrichableException exception =
@@ -72,7 +80,9 @@ class EnrichableExceptionTest {
         );
     }
 
-    // Should allow building an exception without specifying an error code.
+    /**
+     * Should allow building an exception without specifying an error code.
+     */
     @Test
     void shouldAllowMissingCode() {
         EnrichableException exception =
@@ -86,7 +96,9 @@ class EnrichableExceptionTest {
         );
     }
 
-    // Should preserve the specified cause.
+    /**
+     * Should preserve the specified cause.
+     */
     @Test
     void shouldPreserveSpecifiedCause() {
         Throwable cause = new RuntimeException("Database connection failed");
@@ -102,7 +114,9 @@ class EnrichableExceptionTest {
         assertSame(cause, exception.getCause());
     }
 
-    // Should allow building an exception without specifying a cause.
+    /**
+     * Should allow building an exception without specifying a cause.
+     */
     @Test
     void shouldAllowMissingCause() {
         EnrichableException exception =
@@ -114,7 +128,9 @@ class EnrichableExceptionTest {
         assertNull(exception.getCause());
     }
 
-    // Should return the same builder instance when setting a code.
+    /**
+     * Should return the same builder instance when setting a code.
+     */
     @Test
     void shouldReturnSameBuilderWhenSettingCode() {
         EnrichableException.Builder builder =
@@ -126,7 +142,9 @@ class EnrichableExceptionTest {
         assertSame(builder, builder.code("USER_404"));
     }
 
-    // Should return the same builder instance when setting an error level.
+    /**
+     * Should return the same builder instance when setting an error level.
+     */
     @Test
     void shouldReturnSameBuilderWhenSettingLevel() {
         EnrichableException.Builder builder =
@@ -138,7 +156,9 @@ class EnrichableExceptionTest {
         assertSame(builder, builder.level(ErrorLevel.WARNING));
     }
 
-    // Should return the same builder instance when setting a cause.
+    /**
+     * Should return the same builder instance when setting a cause.
+     */
     @Test
     void shouldReturnSameBuilderWhenSettingCause() {
         EnrichableException.Builder builder =
@@ -152,7 +172,9 @@ class EnrichableExceptionTest {
         assertSame(builder, builder.cause(cause));
     }
 
-    // Should create independent exceptions when building multiple times.
+    /**
+     * Should create independent exceptions when building multiple times.
+     */
     @Test
     void shouldCreateIndependentExceptionsWhenBuildingMultipleTimes() {
         EnrichableException.Builder builder =
