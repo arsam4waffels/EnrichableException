@@ -44,12 +44,12 @@ public class FileEnrichLogger {
             LogConfig config) {
 
         synchronized (LOG_LOCK) {
-            List<EnrichInformation> loggable = filter(
+            List<EnrichInformation> filteredInformation = filter(
                     informationList,
                     config
             );
 
-            String report = buildReport(loggable, thrownAt, config);
+            String report = buildReport(filteredInformation, thrownAt, config);
 
             writeToFile(report, config);
         }
@@ -95,16 +95,16 @@ public class FileEnrichLogger {
      * Builds the textual report that will be written to the log file.
      */
     private String buildReport(
-            List<EnrichInformation> list,
+            List<EnrichInformation> informationList,
             String thrownAt,
             LogConfig config) {
 
         StringBuilder report = new StringBuilder();
 
-        appendHeader(report, list.size(), thrownAt, config);
+        appendHeader(report, informationList.size(), thrownAt, config);
 
-        for (int i = 0; i < list.size(); i++) {
-            appendError(report, list.get(i), i, config);
+        for (int i = 0; i < informationList.size(); i++) {
+            appendError(report, informationList.get(i), i, config);
         }
 
         return report.toString();
