@@ -189,6 +189,9 @@ public class FileEnrichLogger {
      * <p>When {@code clearBeforeWrite} is enabled, the existing file
      * content is replaced. Otherwise, the report is appended.</p>
      *
+     * <p>File writing failures are handled internally and do not propagate
+     * to the caller. The failure is reported through {@code System.err}.</p>
+     *
      * @param content report content to write
      * @param config configuration containing the file path and write mode
      */
