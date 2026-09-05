@@ -198,6 +198,10 @@ public class FileEnrichLogger {
     private void writeToFile(String content, LogConfig config) {
         try {
             Path path = Path.of(config.filePath());
+            Path parent = path.getParent();
+
+            if (parent != null)
+                Files.createDirectories(parent);
 
             StandardOpenOption writeMode = config.clearBeforeWrite()
                     ? StandardOpenOption.TRUNCATE_EXISTING

@@ -793,4 +793,45 @@ class FileEnrichLoggerTest {
             Files.deleteIfExists(path);
         }
     }
+
+    // ==================== Nested Directories ====================
+    /**
+     * Should create missing parent directories before writing the log file.
+     */
+    @Test
+    void shouldCreateMissingParentDirectories() throws Exception {
+        Path directory = Files.createTempDirectory("enrichable-test-");
+        Path path = directory
+                .resolve("logs")
+                .resolve("application")
+                .resolve("enrich.log");
+
+        try {
+            LogConfig config = new LogConfig()
+                    .filePath(path.toString())
+                    .clearBeforeWrite(true);
+
+            EnrichInformation information = new EnrichInformation(
+                    "Database",
+                    "DB-001",
+                    "Connection failed",
+                    ErrorLevel.ERROR
+            );
+
+            FileEnrichLogger.getInstance().write(
+                    List.of(information),
+                    "2026-09-05 10:00:00",
+                    config
+            );
+
+            assertTrue(Files.exists(path));
+            assertTrue(Files.isRegularFile(path));
+            assertTrue(Files.exists(path.getParent()));
+        } finally {
+            Files.deleteIfExists(path);
+            Files.deleteIfExists(path.getParent());
+            Files.deleteIfExists(path.getParent().getParent());
+            Files.deleteIfExists(path.getParent().getParent().getParent());
+        }
+    }
 }
