@@ -84,8 +84,8 @@ public class FileEnrichLogger {
         if (config.minimumLevel() != null)
             return informationList.stream()
                     .filter(info ->
-                            info.getErrorLevel().ordinal()
-                                    >= config.minimumLevel().ordinal())
+                            info.getErrorLevel()
+                                    .isAtLeast(config.minimumLevel()))
                     .toList();
 
         return informationList;

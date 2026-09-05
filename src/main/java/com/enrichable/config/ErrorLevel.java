@@ -4,5 +4,9 @@ public enum ErrorLevel {
     INFO,
     WARNING,
     ERROR,
-    CRITICAL
+    CRITICAL;
+
+    public boolean isAtLeast(ErrorLevel minimumLevel) {
+        return ordinal() >= minimumLevel.ordinal();
+    }
 }
