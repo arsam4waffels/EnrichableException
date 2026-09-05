@@ -195,21 +195,18 @@ public class FileEnrichLogger {
     private void writeToFile(String content, LogConfig config) {
         try {
             Path path = Path.of(config.filePath());
-            if (config.clearBeforeWrite()) {
-                Files.writeString(
-                        path,
-                        content,
-                        StandardCharsets.UTF_8,
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING);
-                return;
-            }
+
+            StandardOpenOption writeMode = config.clearBeforeWrite()
+                    ? StandardOpenOption.TRUNCATE_EXISTING
+                    : StandardOpenOption.APPEND;
+
             Files.writeString(
                     path,
                     content,
                     StandardCharsets.UTF_8,
                     StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
+                    writeMode
+            );
         } catch (IOException e) {
             System.err.println(
                     "[The error logger failed while logging an error.] "
