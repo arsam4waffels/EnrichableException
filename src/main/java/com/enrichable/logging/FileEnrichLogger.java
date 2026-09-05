@@ -11,13 +11,33 @@ import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Writes enriched error information to a log file according to a
+ * {@link LogConfig} configuration.
+ *
+ * <p>The logger is thread-safe and uses a shared lock to prevent
+ * concurrent writes from interfering with each other.</p>
+ */
 public class FileEnrichLogger {
 
     private static final Object LOG_LOCK = new Object();
     private static final FileEnrichLogger INSTANCE = new FileEnrichLogger();
 
+    /**
+     * No instance creation is allowed
+     */
     private FileEnrichLogger() {}
 
+    /**
+     * Writes the given enriched information to the configured log file.
+     *
+     * <p>The information is filtered according to {@link LogConfig}, then
+     * formatted into a report and written to the configured file.</p>
+     *
+     * @param informationList enriched error information to be logged
+     * @param thrownAt timestamp representing when the exception was thrown
+     * @param config configuration controlling filtering, formatting, and file output
+     */
     public void write(
             List<EnrichInformation> informationList,
             String thrownAt,
@@ -35,10 +55,22 @@ public class FileEnrichLogger {
         }
     }
 
+    /**
+     * Returns the shared instance of the file logger.
+     *
+     * @return the singleton {@code FileEnrichLogger} instance
+     */
     public static FileEnrichLogger getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * Filters error information according to the configured error level.
+     *
+     * <p>If {@code onlyLevel} is configured, only errors with that exact
+     * level are included. Otherwise, {@code minimumLevel} is used as the
+     * lower bound.</p>
+     */
     private List<EnrichInformation> filter(
             List<EnrichInformation> informationList,
             LogConfig config) {
@@ -59,6 +91,9 @@ public class FileEnrichLogger {
         return informationList;
     }
 
+    /**
+     * Builds the textual report that will be written to the log file.
+     */
     private String buildReport(
             List<EnrichInformation> list,
             String thrownAt,
@@ -148,6 +183,15 @@ public class FileEnrichLogger {
         }
     }
 
+    /**
+     * Writes the generated report to the configured file.
+     *
+     * <p>When {@code clearBeforeWrite} is enabled, the existing file
+     * content is replaced. Otherwise, the report is appended.</p>
+     *
+     * @param content report content to write
+     * @param config configuration containing the file path and write mode
+     */
     private void writeToFile(String content, LogConfig config) {
         try {
             Path path = Path.of(config.filePath());
